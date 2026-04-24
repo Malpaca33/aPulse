@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import {createClient} from '@supabase/supabase-js';
 
 const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
@@ -11,10 +11,29 @@ function assertEnv(name, value) {
   return value;
 }
 
+function normalizeSupabaseUrl(value) {
+  const normalizedValue = assertEnv('PUBLIC_SUPABASE_URL', value).trim().replace(/^['"]|['"]$/g, '');
+
+  let url;
+
+  try {
+    url = new URL(normalizedValue);
+  } catch {
+    throw new Error('PUBLIC_SUPABASE_URL must be a valid URL like https://your-project.supabase.co');
+  }
+
+  // Supabase client expects the project origin, not a product endpoint like /rest/v1.
+  return url.origin;
+}
+
+function normalizeSupabaseAnonKey(value) {
+  return assertEnv('PUBLIC_SUPABASE_ANON_KEY', value).trim().replace(/^['"]|['"]$/g, '');
+}
+
 function getSupabaseConfig() {
   return {
-    url: assertEnv('PUBLIC_SUPABASE_URL', supabaseUrl),
-    anonKey: assertEnv('PUBLIC_SUPABASE_ANON_KEY', supabaseAnonKey),
+    url: normalizeSupabaseUrl(supabaseUrl),
+    anonKey: normalizeSupabaseAnonKey(supabaseAnonKey),
   };
 }
 

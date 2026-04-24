@@ -166,9 +166,19 @@
 </section>
 
 <script type="module">
-  import { createBrowserSupabase } from '../lib/supabase.js';
+  import { createClient } from '@supabase/supabase-js';
 
-  const supabase = createBrowserSupabase();
+  const supabase = createClient(
+    import.meta.env.PUBLIC_SUPABASE_URL,
+    import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
+    {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+      },
+    }
+  );
   const feedList = document.querySelector('#feed-list');
   const feedStatus = document.querySelector('#feed-status');
   const authStatus = document.querySelector('#auth-status');

@@ -89,7 +89,25 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                   </label>
 
                   <div class="mt-4 flex flex-col gap-3 border-t border-white/10 pt-4 sm:flex-row sm:items-center sm:justify-between">
-                    <p id="composer-status" class="text-sm text-white/55">自动匿名登录后即可直接发帖。</p>
+                    <div class="space-y-3">
+                      <p id="composer-status" class="text-sm text-white/55">自动匿名登录后即可直接发帖。</p>
+                      <div class="flex flex-wrap gap-2">
+                        <button
+                          id="anon-login-button"
+                          type="button"
+                          class="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-white/80 transition hover:border-cyan-400/40 hover:bg-cyan-400/10 hover:text-white"
+                        >
+                          匿名登录
+                        </button>
+                        <button
+                          id="github-login-button"
+                          type="button"
+                          class="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-white/80 transition hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
+                        >
+                          GitHub 登录
+                        </button>
+                      </div>
+                    </div>
                     <button
                       id="submit-button"
                       type="submit"
@@ -135,9 +153,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       </aside>
     </div>
   </section>
-</BaseLayout>
-
-<script type="module">
+  <script>
   import { createBrowserSupabase } from '../lib/supabase.js';
 
   const supabase = createBrowserSupabase();
@@ -145,6 +161,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   const tweetInput = document.querySelector('#tweet-input');
   const submitButton = document.querySelector('#submit-button');
   const refreshButton = document.querySelector('#refresh-button');
+  const anonLoginButton = document.querySelector('#anon-login-button');
+  const githubLoginButton = document.querySelector('#github-login-button');
   const feedList = document.querySelector('#feed-list');
   const feedStatus = document.querySelector('#feed-status');
   const composerHint = document.querySelector('#composer-hint');
@@ -156,6 +174,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   let session = null;
   let refreshInFlight = false;
   let realtimeChannel = null;
+  let authErrorMessage = '';
 
   function escapeHtml(value) {
     return String(value)
@@ -198,19 +217,40 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     return '刚刚';
   }
 
+  function toFriendlyErrorMessage(error) {
+    const message = error?.message ?? '发生未知错误。';
+
+    if (message === 'Anonymous sign-ins are disabled') {
+      return 'Supabase 未启用匿名登录。请在 Authentication > Providers > Anonymous 中开启，或改用 GitHub 登录。';
+    }
+
+    if (message === 'Invalid path specified in request URL') {
+      return 'PUBLIC_SUPABASE_URL 配置不正确，应为 https://<project-ref>.supabase.co';
+    }
+
+    if (message.includes('row-level security policy')) {
+      return '远端 Supabase 的 tweets 插入策略仍在拒绝当前会话。请把仓库里的 supabase/schema.sql 重新执行到数据库后再试。';
+    }
+
+    return message;
+  }
+
   function updateComposerState() {
     const length = tweetInput.value.trim().length;
     const ready = Boolean(session) && length > 0 && length <= 280;
 
     charCount.textContent = `${length} / 280`;
     submitButton.disabled = !ready;
+    anonLoginButton.classList.toggle('hidden', Boolean(session));
+    githubLoginButton.classList.toggle('hidden', Boolean(session));
 
     if (!session) {
-      composerHint.textContent = '正在建立匿名会话...';
-      composerStatus.textContent = 'Supabase 会话准备好后即可发帖。';
+      composerHint.textContent = authErrorMessage ? '当前未建立可用会话' : '正在建立匿名会话...';
+      composerStatus.textContent = authErrorMessage || 'Supabase 会话准备好后即可发帖。';
       return;
     }
 
+    authErrorMessage = '';
     composerHint.textContent = `当前身份 ${session.user.id.slice(0, 8)}`;
 
     if (!length) {
@@ -283,7 +323,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     const { data, error } = await supabase.auth.signInAnonymously();
 
     if (error) {
-      throw error;
+      throw new Error(toFriendlyErrorMessage(error));
     }
 
     session = data.session ?? null;
@@ -292,6 +332,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       throw new Error('匿名会话创建失败。');
     }
 
+    authErrorMessage = '';
     sessionLabel.textContent = session
       ? `匿名用户 ${session.user.id.slice(0, 8)}`
       : '匿名会话已创建';
@@ -318,7 +359,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         .limit(50);
 
       if (error) {
-        throw error;
+        throw new Error(toFriendlyErrorMessage(error));
       }
 
       renderTweets(data ?? []);
@@ -346,13 +387,17 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     try {
       const currentSession = await ensureSession();
 
+      if (!currentSession) {
+        composerStatus.textContent = authErrorMessage || '请先完成登录。';
+        return;
+      }
+
       const { error } = await supabase.from('tweets').insert({
         content,
-        user_id: currentSession.user.id,
       });
 
       if (error) {
-        throw error;
+        throw new Error(toFriendlyErrorMessage(error));
       }
 
       tweetInput.value = '';
@@ -361,7 +406,37 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       await fetchTweets({ silent: true });
     } catch (error) {
       updateComposerState();
-      composerStatus.textContent = error.message;
+      composerStatus.textContent = toFriendlyErrorMessage(error);
+    }
+  }
+
+  async function signInAnonymously() {
+    try {
+      composerStatus.textContent = '正在创建匿名会话...';
+      await ensureSession();
+      composerStatus.textContent = '匿名会话已就绪。';
+    } catch (error) {
+      authErrorMessage = toFriendlyErrorMessage(error);
+      updateComposerState();
+    }
+  }
+
+  async function signInWithGitHub() {
+    try {
+      const redirectTo = new URL(window.location.href);
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'github',
+        options: {
+          redirectTo: redirectTo.toString(),
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
+    } catch (error) {
+      authErrorMessage = toFriendlyErrorMessage(error);
+      updateComposerState();
     }
   }
 
@@ -378,9 +453,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   tweetInput.addEventListener('input', updateComposerState);
   tweetForm.addEventListener('submit', submitTweet);
   refreshButton.addEventListener('click', () => fetchTweets());
+  anonLoginButton.addEventListener('click', signInAnonymously);
+  githubLoginButton.addEventListener('click', signInWithGitHub);
 
   supabase.auth.onAuthStateChange((_event, nextSession) => {
     session = nextSession;
+    authErrorMessage = '';
     sessionLabel.textContent = nextSession
       ? `匿名用户 ${nextSession.user.id.slice(0, 8)}`
       : '未建立会话';
@@ -388,16 +466,15 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   });
 
   updateComposerState();
+  mountRealtime();
+  await fetchTweets();
 
   try {
     await ensureSession();
-    mountRealtime();
-    await fetchTweets();
   } catch (error) {
+    authErrorMessage = toFriendlyErrorMessage(error);
+    sessionLabel.textContent = '未建立会话';
     updateComposerState();
-    sessionLabel.textContent = '连接失败';
-    composerHint.textContent = 'Supabase 初始化失败';
-    composerStatus.textContent = error.message;
-    feedStatus.textContent = error.message;
   }
 </script>
+</BaseLayout>

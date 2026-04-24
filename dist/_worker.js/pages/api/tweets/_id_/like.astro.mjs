@@ -1,5 +1,5 @@
 globalThis.process ??= {}; globalThis.process.env ??= {};
-import { g as getUserFromRequest } from '../../../../chunks/supabase_Dgi4yRyu.mjs';
+import { g as getUserFromRequest } from '../../../../chunks/supabase_KnSfRDel.mjs';
 export { renderers } from '../../../../renderers.mjs';
 
 const prerender = false;

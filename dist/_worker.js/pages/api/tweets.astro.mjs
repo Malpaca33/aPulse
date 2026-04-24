@@ -1,5 +1,5 @@
 globalThis.process ??= {}; globalThis.process.env ??= {};
-import { g as getUserFromRequest } from '../../chunks/supabase_Dgi4yRyu.mjs';
+import { g as getUserFromRequest } from '../../chunks/supabase_KnSfRDel.mjs';
 export { renderers } from '../../renderers.mjs';
 
 const prerender = false;
@@ -82,7 +82,6 @@ async function POST({ request }) {
     .from('tweets')
     .insert({
       content,
-      user_id: user.id,
     })
     .select('id, content, created_at, user_id, likes_count')
     .single();

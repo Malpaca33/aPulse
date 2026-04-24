@@ -1,4 +1,4 @@
-import { getUserFromRequest } from '../../lib/supabase.js';
+import {getUserFromRequest} from '../../lib/supabase.js';
 
 export const prerender = false;
 
@@ -80,7 +80,6 @@ export async function POST({ request }) {
     .from('tweets')
     .insert({
       content,
-      user_id: user.id,
     })
     .select('id, content, created_at, user_id, likes_count')
     .single();

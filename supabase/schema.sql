@@ -4,7 +4,7 @@ create table if not exists public.tweets (
   id uuid primary key default gen_random_uuid(),
   content text not null check (char_length(content) <= 280),
   created_at timestamptz not null default timezone('utc'::text, now()),
-  user_id uuid not null references auth.users(id) on delete cascade,
+  user_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
   likes_count integer not null default 0 check (likes_count >= 0)
 );
 
@@ -63,6 +63,7 @@ for each row execute function public.sync_tweet_likes_count();
 
 alter table public.tweets enable row level security;
 alter table public.tweet_likes enable row level security;
+alter table public.tweets alter column user_id set default auth.uid();
 
 drop policy if exists "tweets are publicly readable" on public.tweets;
 create policy "tweets are publicly readable"
@@ -70,12 +71,27 @@ on public.tweets
 for select
 using (true);
 
-drop policy if exists "authenticated users can post tweets" on public.tweets;
-create policy "authenticated users can post tweets"
+do $$
+declare
+  existing_policy record;
+begin
+  for existing_policy in
+    select policyname
+    from pg_policies
+    where schemaname = 'public'
+      and tablename = 'tweets'
+      and cmd = 'INSERT'
+  loop
+    execute format('drop policy if exists %I on public.tweets', existing_policy.policyname);
+  end loop;
+end
+$$;
+
+create policy "signed in users can post tweets"
 on public.tweets
 for insert
-to authenticated
-with check (auth.uid() = user_id);
+to public
+with check (auth.uid() is not null and auth.uid() = user_id);
 
 drop policy if exists "users can see their own likes" on public.tweet_likes;
 create policy "users can see their own likes"
