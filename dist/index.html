@@ -1,40 +1,34 @@
-<!DOCTYPE html><html lang="zh-CN"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Minimal Social</title><link rel="stylesheet" href="/_astro/index.6Pn6iB0D.css"></head> <body>  <section class="min-h-screen bg-slate-50 text-slate-950 transition-colors dark:bg-black dark:text-slate-100"> <div class="mx-auto grid min-h-screen max-w-[1320px] grid-cols-1 lg:grid-cols-[17rem_minmax(0,1fr)] xl:grid-cols-[17rem_minmax(0,1fr)_22rem]"> <aside class="border-b border-slate-200/90 px-4 py-4 dark:border-slate-800 lg:sticky lg:top-0 lg:h-screen lg:border-b-0 lg:border-r lg:px-6 lg:py-6"> <div class="flex items-center justify-between lg:block"> <a href="/" class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-slate-950 text-lg font-black tracking-tight text-white transition hover:scale-[1.03] dark:bg-white dark:text-black" aria-label="Minimal Social Home">
+<!DOCTYPE html><html lang="zh-CN"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>X Feed | Astro + Supabase</title><link rel="stylesheet" href="/_astro/index.BeaoFwGm.css"></head> <body>  <section class="min-h-screen bg-black text-white"> <div class="mx-auto grid min-h-screen max-w-7xl grid-cols-1 xl:grid-cols-[17rem_minmax(0,1fr)_22rem]"> <aside class="hidden border-r border-white/10 px-6 py-8 xl:block"> <div class="sticky top-0 space-y-8"> <a href="/" class="inline-flex h-14 w-14 items-center justify-center rounded-full border border-white/10 bg-white/[0.06] text-2xl font-black tracking-tight text-white transition hover:scale-[1.02] hover:bg-white/[0.1]" aria-label="Home">
 X
-</a> <nav class="hidden lg:mt-8 lg:block"> <ul class="space-y-2"> <li> <a href="/" class="flex items-center gap-3 rounded-full px-4 py-3 text-[15px] font-semibold text-slate-950 transition hover:bg-slate-100 dark:text-white dark:hover:bg-slate-900"> <span class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-lg dark:border-slate-700">H</span> <span>Home</span> </a> </li> <li> <a href="#feed" class="flex items-center gap-3 rounded-full px-4 py-3 text-[15px] font-semibold text-slate-700 transition hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-900"> <span class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-lg dark:border-slate-700">N</span> <span>Notifications</span> </a> </li> <li> <a href="#profile-card" class="flex items-center gap-3 rounded-full px-4 py-3 text-[15px] font-semibold text-slate-700 transition hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-900"> <span class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-lg dark:border-slate-700">P</span> <span>Profile</span> </a> </li> </ul> </nav> </div> <nav class="mt-4 flex items-center justify-around rounded-full border border-slate-200 bg-white/90 p-1 dark:border-slate-800 dark:bg-slate-950 lg:hidden"> <a href="/" class="flex min-w-[5rem] items-center justify-center rounded-full px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-100 dark:text-white dark:hover:bg-slate-900">Home</a> <a href="#feed" class="flex min-w-[5rem] items-center justify-center rounded-full px-4 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-900">Notify</a> <a href="#profile-card" class="flex min-w-[5rem] items-center justify-center rounded-full px-4 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-900">Profile</a> </nav> <div id="profile-card" class="mt-6 rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950"> <p class="text-xs font-semibold uppercase tracking-[0.28em] text-sky-600 dark:text-sky-400">Session</p> <div id="auth-status" class="mt-4 space-y-2"> <p class="text-sm text-slate-500 dark:text-slate-400">Checking authentication...</p> </div> <div class="mt-5 space-y-3"> <button id="github-login" class="w-full rounded-full bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-white dark:text-black dark:hover:bg-slate-200">
-Continue with GitHub
-</button> <button id="anon-login" class="w-full rounded-full border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-900">
-Use anonymous identity
-</button> <button id="sign-out" class="hidden w-full rounded-full border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-900">
-Sign out
-</button> </div> </div> </aside> <main id="feed" class="min-w-0 border-slate-200/90 dark:border-slate-800 lg:border-r"> <header class="sticky top-0 z-30 border-b border-slate-200/90 bg-white/85 backdrop-blur dark:border-slate-800 dark:bg-black/80"> <div class="flex items-center justify-between px-4 py-4 sm:px-6"> <div> <p class="text-[11px] font-semibold uppercase tracking-[0.32em] text-sky-600 dark:text-sky-400">Main Feed</p> <h1 class="mt-1 text-xl font-bold tracking-tight">Home</h1> </div> <button id="refresh-feed" class="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-900">
-Refresh
-</button> </div> </header> <section class="border-b border-slate-200/90 bg-white px-4 py-5 dark:border-slate-800 dark:bg-black sm:px-6"> <div class="flex items-start gap-3"> <div class="mt-1 flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-sky-100 text-sm font-bold uppercase text-sky-700 dark:bg-slate-800 dark:text-sky-300">
-MS
-</div> <div class="min-w-0 flex-1"> <div class="flex items-start justify-between gap-4"> <div> <p class="text-base font-semibold text-slate-950 dark:text-white">Compose a post</p> <p id="composer-hint" class="mt-1 text-sm text-slate-500 dark:text-slate-400">Login required</p> </div> <span id="char-count" class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500 dark:bg-slate-900 dark:text-slate-300">
+</a> <nav class="space-y-2"> <a href="#composer" class="flex items-center gap-3 rounded-full px-4 py-3 text-base font-semibold transition hover:bg-white/[0.06]"> <span class="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/[0.06] text-lg">⌂</span> <span>主页</span> </a> <a href="#timeline" class="flex items-center gap-3 rounded-full px-4 py-3 text-base font-semibold text-white/70 transition hover:bg-white/[0.06] hover:text-white"> <span class="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/[0.06] text-lg">#</span> <span>时间线</span> </a> <a href="#status-card" class="flex items-center gap-3 rounded-full px-4 py-3 text-base font-semibold text-white/70 transition hover:bg-white/[0.06] hover:text-white"> <span class="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/[0.06] text-lg">@</span> <span>会话</span> </a> </nav> <div id="status-card" class="rounded-3xl border border-white/10 bg-white/[0.04] p-5 shadow-[0_0_0_1px_rgba(255,255,255,0.02)] backdrop-blur"> <p class="text-[11px] font-semibold uppercase tracking-[0.35em] text-cyan-400">Supabase</p> <p class="mt-3 text-lg font-semibold text-white">实时状态</p> <p id="session-label" class="mt-2 text-sm text-white/65">正在初始化匿名会话...</p> </div> </div> </aside> <main class="min-w-0 border-x border-white/10"> <header class="sticky top-0 z-20 border-b border-white/10 bg-black/80 backdrop-blur-xl"> <div class="px-4 py-4 sm:px-6"> <p class="text-[11px] font-semibold uppercase tracking-[0.35em] text-cyan-400">For You</p> <div class="mt-2 flex items-end justify-between gap-4"> <div> <h1 class="text-2xl font-black tracking-tight text-white">Home</h1> <p class="mt-1 text-sm text-white/55">Astro + Supabase 的实时推文流</p> </div> <button id="refresh-button" type="button" class="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-white/80 transition hover:border-cyan-400/40 hover:bg-cyan-400/10 hover:text-white">
+刷新
+</button> </div> </div> </header> <section id="composer" class="relative overflow-hidden border-b border-white/10"> <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.14),transparent_45%),linear-gradient(180deg,rgba(255,255,255,0.03),transparent)]"></div> <div class="relative px-4 py-5 sm:px-6"> <div class="flex items-start gap-4"> <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-cyan-400/20 bg-cyan-400/10 text-sm font-black uppercase text-cyan-300">
+ME
+</div> <div class="min-w-0 flex-1"> <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"> <div> <p class="text-lg font-semibold text-white">有什么新鲜事？</p> <p id="composer-hint" class="mt-1 text-sm text-white/55">正在连接 Supabase...</p> </div> <div id="char-count" class="inline-flex rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-xs font-semibold text-white/60">
 0 / 280
-</span> </div> <form id="tweet-form" class="mt-4"> <label class="block"> <span class="sr-only">Tweet content</span> <textarea id="tweet-content" rows="4" placeholder="What is happening right now?" class="min-h-[7.5rem] w-full resize-none border-0 bg-transparent px-0 text-[1.05rem] leading-7 text-slate-900 outline-none placeholder:text-slate-400 focus:ring-0 dark:text-white dark:placeholder:text-slate-500"></textarea> </label> <div class="mt-4 flex flex-col gap-3 border-t border-slate-200 pt-4 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between"> <p id="composer-status" class="text-sm text-slate-500 dark:text-slate-400">Publish up to 280 characters.</p> <button id="tweet-submit" type="submit" class="rounded-full bg-sky-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-slate-300 dark:disabled:bg-slate-700">
-Post
-</button> </div> </form> </div> </div> </section> <div class="border-b border-slate-200/90 px-4 py-3 text-sm text-slate-500 dark:border-slate-800 dark:text-slate-400 sm:px-6"> <p id="feed-status">Loading latest tweets...</p> </div> <div id="feed-list" class="divide-y divide-slate-200 dark:divide-slate-800"></div> </main> <aside class="hidden px-6 py-6 xl:block"> <div class="sticky top-0 space-y-5"> <div class="rounded-[1.75rem] bg-slate-100/90 p-4 dark:bg-slate-950"> <label class="flex items-center gap-3 rounded-full bg-white px-4 py-3 text-sm text-slate-500 shadow-sm ring-1 ring-slate-200 dark:bg-black dark:text-slate-400 dark:ring-slate-800"> <span class="text-base">#</span> <input type="search" placeholder="Search" class="w-full border-0 bg-transparent p-0 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:ring-0 dark:text-white dark:placeholder:text-slate-500"> </label> </div> <section class="rounded-[1.75rem] bg-slate-100/90 p-5 dark:bg-slate-950"> <div class="flex items-center justify-between"> <div> <p class="text-[11px] font-semibold uppercase tracking-[0.3em] text-sky-600 dark:text-sky-400">For You</p> <h2 class="mt-1 text-xl font-bold text-slate-950 dark:text-white">Trends</h2> </div> <span class="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-600 shadow-sm dark:bg-black dark:text-slate-300">Live</span> </div> <div class="mt-4 space-y-2"> <article class="rounded-2xl border border-slate-200 bg-white p-4 transition hover:border-slate-300 dark:border-slate-800 dark:bg-black dark:hover:border-slate-700"> <p class="text-xs uppercase tracking-[0.25em] text-slate-400">AI builders</p> <h3 class="mt-2 text-sm font-semibold text-slate-950 dark:text-white">Astro + Supabase shipping logs</h3> <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">12.4K posts</p> </article> <article class="rounded-2xl border border-slate-200 bg-white p-4 transition hover:border-slate-300 dark:border-slate-800 dark:bg-black dark:hover:border-slate-700"> <p class="text-xs uppercase tracking-[0.25em] text-slate-400">Design systems</p> <h3 class="mt-2 text-sm font-semibold text-slate-950 dark:text-white">Minimal social interfaces</h3> <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">8.1K posts</p> </article> <article class="rounded-2xl border border-slate-200 bg-white p-4 transition hover:border-slate-300 dark:border-slate-800 dark:bg-black dark:hover:border-slate-700"> <p class="text-xs uppercase tracking-[0.25em] text-slate-400">Realtime</p> <h3 class="mt-2 text-sm font-semibold text-slate-950 dark:text-white">Postgres changes in production</h3> <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">5.9K posts</p> </article> </div> </section> </div> </aside> </div> </section> <script type="module">
+</div> </div> <form id="tweet-form" class="mt-4"> <label class="block"> <span class="sr-only">推文内容</span> <textarea id="tweet-input" rows="5" maxlength="280" placeholder="分享你的构建进度、想法或灵感..." class="min-h-[9rem] w-full resize-none border-0 bg-transparent px-0 text-lg leading-8 text-white outline-none placeholder:text-white/30 focus:ring-0"></textarea> </label> <div class="mt-4 flex flex-col gap-3 border-t border-white/10 pt-4 sm:flex-row sm:items-center sm:justify-between"> <p id="composer-status" class="text-sm text-white/55">自动匿名登录后即可直接发帖。</p> <button id="submit-button" type="submit" class="inline-flex items-center justify-center rounded-full bg-cyan-500 px-5 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-white/35">
+发帖
+</button> </div> </form> </div> </div> </div> </section> <section id="timeline"> <div class="border-b border-white/10 px-4 py-3 text-sm text-white/55 sm:px-6"> <p id="feed-status">正在加载最新推文...</p> </div> <div id="feed-list" class="divide-y divide-white/10"></div> </section> </main> <aside class="hidden px-6 py-8 xl:block"> <div class="sticky top-0 space-y-5"> <section class="rounded-3xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur"> <p class="text-[11px] font-semibold uppercase tracking-[0.35em] text-cyan-400">Now</p> <h2 class="mt-3 text-xl font-bold text-white">构建提示</h2> <div class="mt-4 space-y-3 text-sm text-white/65"> <p class="rounded-2xl border border-white/10 bg-white/[0.03] p-4">发帖直接通过 `@supabase/supabase-js` 写入 `tweets` 表。</p> <p class="rounded-2xl border border-white/10 bg-white/[0.03] p-4">列表实时订阅 `public.tweets`，默认按 `created_at desc` 排列。</p> <p class="rounded-2xl border border-white/10 bg-white/[0.03] p-4">视觉层采用深色、模糊玻璃和高对比边框，贴近 X 的节奏。</p> </div> </section> <section class="rounded-3xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur"> <p class="text-[11px] font-semibold uppercase tracking-[0.35em] text-cyan-400">Live</p> <h2 class="mt-3 text-xl font-bold text-white">时间线策略</h2> <p class="mt-3 text-sm leading-7 text-white/65">
+页面初始化时会自动创建匿名会话，这样无需额外交互就能满足 `tweets.user_id` 的写入约束。
+</p> </section> </div> </aside> </div> </section>  </body></html> <script type="module">
   import { createBrowserSupabase } from '../lib/supabase.js';
 
   const supabase = createBrowserSupabase();
+  const tweetForm = document.querySelector('#tweet-form');
+  const tweetInput = document.querySelector('#tweet-input');
+  const submitButton = document.querySelector('#submit-button');
+  const refreshButton = document.querySelector('#refresh-button');
   const feedList = document.querySelector('#feed-list');
   const feedStatus = document.querySelector('#feed-status');
-  const authStatus = document.querySelector('#auth-status');
   const composerHint = document.querySelector('#composer-hint');
   const composerStatus = document.querySelector('#composer-status');
-  const tweetForm = document.querySelector('#tweet-form');
-  const tweetContent = document.querySelector('#tweet-content');
-  const tweetSubmit = document.querySelector('#tweet-submit');
+  const sessionLabel = document.querySelector('#session-label');
   const charCount = document.querySelector('#char-count');
-  const refreshFeedButton = document.querySelector('#refresh-feed');
-  const githubLoginButton = document.querySelector('#github-login');
-  const anonLoginButton = document.querySelector('#anon-login');
-  const signOutButton = document.querySelector('#sign-out');
   const relativeTimeFormatter = new Intl.RelativeTimeFormat('zh-CN', { numeric: 'auto' });
 
-  let currentSession = null;
-  let feedRequestInFlight = false;
+  let session = null;
+  let refreshInFlight = false;
+  let realtimeChannel = null;
 
   function escapeHtml(value) {
     return String(value)
@@ -45,30 +39,16 @@ Post
       .replaceAll("'", '&#39;');
   }
 
-  function formatIdentity(session) {
-    const user = session?.user;
-
-    if (!user) {
-      return 'Not signed in';
+  function formatAuthor(userId) {
+    if (!userId) {
+      return 'Unknown';
     }
 
-    if (user.app_metadata?.provider === 'github') {
-      return user.user_metadata?.user_name || user.user_metadata?.preferred_username || user.email || 'GitHub user';
+    if (session?.user?.id === userId) {
+      return '你';
     }
 
-    if (user.is_anonymous) {
-      return `Anonymous ${user.id.slice(0, 8)}`;
-    }
-
-    return user.email || user.id.slice(0, 8);
-  }
-
-  function formatAuthor(tweet) {
-    if (currentSession?.user?.id === tweet.user_id) {
-      return 'You';
-    }
-
-    return `User ${tweet.user_id.slice(0, 8)}`;
+    return `@${userId.slice(0, 8)}`;
   }
 
   function formatRelativeTime(value) {
@@ -76,9 +56,6 @@ Post
     const target = new Date(value).getTime();
     const diffSeconds = Math.round((target - now) / 1000);
     const ranges = [
-      { unit: 'year', seconds: 31536000 },
-      { unit: 'month', seconds: 2592000 },
-      { unit: 'week', seconds: 604800 },
       { unit: 'day', seconds: 86400 },
       { unit: 'hour', seconds: 3600 },
       { unit: 'minute', seconds: 60 },
@@ -91,59 +68,38 @@ Post
       }
     }
 
-    return 'just now';
+    return '刚刚';
   }
 
-  function setComposerEnabled(enabled) {
-    tweetContent.disabled = !enabled;
-    composerHint.textContent = enabled ? `Posting as ${formatIdentity(currentSession)}` : 'Login required';
-  }
+  function updateComposerState() {
+    const length = tweetInput.value.trim().length;
+    const ready = Boolean(session) && length > 0 && length <= 280;
 
-  function updateSubmitState() {
-    const content = tweetContent.value.trim();
-    const isOverLimit = content.length > 280;
-    const isEmpty = content.length === 0;
+    charCount.textContent = `${length} / 280`;
+    submitButton.disabled = !ready;
 
-    charCount.textContent = `${content.length} / 280`;
-    charCount.className = isOverLimit
-      ? 'rounded-full bg-rose-100 px-3 py-1 text-xs font-semibold text-rose-600 dark:bg-rose-950/60 dark:text-rose-300'
-      : 'rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500 dark:bg-slate-900 dark:text-slate-300';
-
-    if (isOverLimit) {
-      composerStatus.textContent = 'Tweet content must be 280 characters or fewer.';
-    } else if (isEmpty) {
-      composerStatus.textContent = 'Publish up to 280 characters.';
-    } else {
-      composerStatus.textContent = 'Ready to post.';
+    if (!session) {
+      composerHint.textContent = '正在建立匿名会话...';
+      composerStatus.textContent = 'Supabase 会话准备好后即可发帖。';
+      return;
     }
 
-    tweetSubmit.disabled = !currentSession || isEmpty || isOverLimit;
-  }
+    composerHint.textContent = `当前身份 ${session.user.id.slice(0, 8)}`;
 
-  function renderAuth() {
-    authStatus.innerHTML = currentSession
-      ? `
-        <p class="text-base font-semibold text-slate-950 dark:text-white">${escapeHtml(formatIdentity(currentSession))}</p>
-        <p class="text-sm text-slate-500 dark:text-slate-400">${escapeHtml(currentSession.user.id)}</p>
-      `
-      : `
-        <p class="text-base font-semibold text-slate-950 dark:text-white">Visitor mode</p>
-        <p class="text-sm text-slate-500 dark:text-slate-400">Read the feed or sign in to publish and like.</p>
-      `;
+    if (!length) {
+      composerStatus.textContent = '输入一些内容，然后直接发帖。';
+      return;
+    }
 
-    githubLoginButton.classList.toggle('hidden', Boolean(currentSession));
-    anonLoginButton.classList.toggle('hidden', Boolean(currentSession));
-    signOutButton.classList.toggle('hidden', !currentSession);
-    setComposerEnabled(Boolean(currentSession));
-    updateSubmitState();
+    composerStatus.textContent = '内容已就绪。';
   }
 
   function renderTweets(tweets) {
     if (!tweets.length) {
       feedList.innerHTML = `
-        <article class="px-4 py-12 text-center sm:px-6">
-          <div class="rounded-[1.5rem] border border-dashed border-slate-300 bg-white px-6 py-10 text-slate-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-400">
-            No tweets yet. Publish the first one.
+        <article class="px-4 py-12 sm:px-6">
+          <div class="rounded-3xl border border-dashed border-white/15 bg-white/[0.03] px-6 py-10 text-center text-white/50">
+            还没有推文，发出第一条吧。
           </div>
         </article>
       `;
@@ -151,249 +107,170 @@ Post
     }
 
     feedList.innerHTML = tweets
-      .map(
-        (tweet) => `
-          <article class="group px-4 py-4 transition hover:bg-slate-50 dark:hover:bg-slate-950/60 sm:px-6">
-            <div class="rounded-[1.5rem] border border-slate-200 bg-white p-5 transition group-hover:border-slate-300 dark:border-slate-800 dark:bg-black dark:group-hover:border-slate-700">
-              <div class="flex items-start gap-3">
-                <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-slate-100 text-sm font-bold text-slate-700 dark:bg-slate-900 dark:text-slate-200">
-                  ${escapeHtml(formatAuthor(tweet).slice(0, 2).toUpperCase())}
+      .map((tweet) => {
+        const author = formatAuthor(tweet.user_id);
+        const badge = escapeHtml(author.replace('@', '').slice(0, 2).toUpperCase());
+        const timestamp = new Date(tweet.created_at).toLocaleString('zh-CN', {
+          hour12: false,
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+        });
+
+        return `
+          <article class="group px-4 py-4 transition hover:bg-white/[0.03] sm:px-6">
+            <div class="flex items-start gap-4">
+              <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.05] text-sm font-black text-white/80">
+                ${badge}
+              </div>
+              <div class="min-w-0 flex-1">
+                <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                  <span class="text-sm font-semibold text-white">${escapeHtml(author)}</span>
+                  <span class="text-sm text-white/25">·</span>
+                  <span class="text-sm text-white/45">${escapeHtml(formatRelativeTime(tweet.created_at))}</span>
+                  <span class="text-sm text-white/25">·</span>
+                  <span class="text-sm text-white/35">${escapeHtml(timestamp)}</span>
                 </div>
-                <div class="min-w-0 flex-1">
-                  <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
-                    <p class="text-sm font-semibold text-slate-950 dark:text-white">${escapeHtml(formatAuthor(tweet))}</p>
-                    <span class="text-sm text-slate-400 dark:text-slate-500">·</span>
-                    <p class="text-sm text-slate-500 dark:text-slate-400">${escapeHtml(formatRelativeTime(tweet.created_at))}</p>
-                  </div>
-                  <p class="mt-3 whitespace-pre-wrap text-[15px] leading-7 text-slate-700 dark:text-slate-200">${escapeHtml(tweet.content)}</p>
-                  <div class="mt-5 flex items-center justify-between">
-                    <span class="text-xs uppercase tracking-[0.22em] text-slate-400 dark:text-slate-500">Realtime feed</span>
-                    <button
-                      type="button"
-                      data-like-id="${tweet.id}"
-                      class="like-button inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition ${
-                        tweet.viewer_has_liked
-                          ? 'border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-300 dark:hover:bg-rose-950/60'
-                          : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50 dark:border-slate-800 dark:bg-black dark:text-slate-300 dark:hover:border-slate-700 dark:hover:bg-slate-950'
-                      }"
-                      ${currentSession ? '' : 'disabled'}
-                    >
-                      <span aria-hidden="true">${tweet.viewer_has_liked ? '♥' : '♡'}</span>
-                      <span>${tweet.likes_count}</span>
-                    </button>
-                  </div>
-                </div>
+                <p class="mt-3 whitespace-pre-wrap text-[15px] leading-7 text-white/85">${escapeHtml(tweet.content)}</p>
               </div>
             </div>
           </article>
-        `,
-      )
+        `;
+      })
       .join('');
   }
 
-  async function getAccessToken() {
-    const { data } = await supabase.auth.getSession();
-    return data.session?.access_token ?? null;
+  async function ensureSession() {
+    const {
+      data: { session: existingSession },
+    } = await supabase.auth.getSession();
+
+    if (existingSession) {
+      session = existingSession;
+      sessionLabel.textContent = `匿名用户 ${existingSession.user.id.slice(0, 8)}`;
+      updateComposerState();
+      return existingSession;
+    }
+
+    const { data, error } = await supabase.auth.signInAnonymously();
+
+    if (error) {
+      throw error;
+    }
+
+    session = data.session ?? null;
+
+    if (!session) {
+      throw new Error('匿名会话创建失败。');
+    }
+
+    sessionLabel.textContent = session
+      ? `匿名用户 ${session.user.id.slice(0, 8)}`
+      : '匿名会话已创建';
+    updateComposerState();
+    return session;
   }
 
   async function fetchTweets({ silent = false } = {}) {
-    if (feedRequestInFlight) {
+    if (refreshInFlight) {
       return;
     }
 
-    feedRequestInFlight = true;
+    refreshInFlight = true;
 
     if (!silent) {
-      feedStatus.textContent = 'Refreshing feed...';
+      feedStatus.textContent = '正在同步最新推文...';
     }
 
     try {
-      const accessToken = await getAccessToken();
-      const response = await fetch('/api/tweets', {
-        headers: accessToken
-          ? {
-              Authorization: `Bearer ${accessToken}`,
-            }
-          : {},
-      });
-      const payload = await response.json();
+      const { data, error } = await supabase
+        .from('tweets')
+        .select('id, content, created_at, user_id')
+        .order('created_at', { ascending: false })
+        .limit(50);
 
-      if (!response.ok) {
-        throw new Error(payload.error || 'Failed to load tweets.');
+      if (error) {
+        throw error;
       }
 
-      renderTweets(payload.tweets);
-      feedStatus.textContent = `Updated ${formatRelativeTime(new Date().toISOString())}`;
+      renderTweets(data ?? []);
+      feedStatus.textContent = `已更新 ${formatRelativeTime(new Date().toISOString())}`;
     } catch (error) {
       feedStatus.textContent = error.message;
     } finally {
-      feedRequestInFlight = false;
+      refreshInFlight = false;
     }
   }
 
   async function submitTweet(event) {
     event.preventDefault();
 
-    const content = tweetContent.value.trim();
+    const content = tweetInput.value.trim();
 
     if (!content) {
-      composerStatus.textContent = 'Write something before publishing.';
+      composerStatus.textContent = '先输入内容再发帖。';
       return;
     }
 
-    if (content.length > 280) {
-      composerStatus.textContent = 'Tweet content must be 280 characters or fewer.';
-      updateSubmitState();
-      return;
-    }
-
-    tweetSubmit.disabled = true;
-    composerStatus.textContent = 'Publishing...';
+    submitButton.disabled = true;
+    composerStatus.textContent = '正在发帖...';
 
     try {
-      const accessToken = await getAccessToken();
+      const currentSession = await ensureSession();
 
-      if (!accessToken) {
-        throw new Error('Authentication required.');
-      }
-
-      const response = await fetch('/api/tweets', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify({ content }),
+      const { error } = await supabase.from('tweets').insert({
+        content,
+        user_id: currentSession.user.id,
       });
-      const payload = await response.json();
 
-      if (!response.ok) {
-        throw new Error(payload.error || 'Failed to publish tweet.');
+      if (error) {
+        throw error;
       }
 
-      tweetContent.value = '';
-      composerStatus.textContent = 'Tweet published.';
-      updateSubmitState();
+      tweetInput.value = '';
+      updateComposerState();
+      composerStatus.textContent = '发帖成功。';
       await fetchTweets({ silent: true });
     } catch (error) {
+      updateComposerState();
       composerStatus.textContent = error.message;
-    } finally {
-      updateSubmitState();
     }
-  }
-
-  async function toggleLike(tweetId, button) {
-    if (!currentSession) {
-      feedStatus.textContent = 'Login required to like tweets.';
-      return;
-    }
-
-    button.disabled = true;
-
-    try {
-      const accessToken = await getAccessToken();
-
-      if (!accessToken) {
-        throw new Error('Authentication required.');
-      }
-
-      const response = await fetch(`/api/tweets/${tweetId}/like`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-      const payload = await response.json();
-
-      if (!response.ok) {
-        throw new Error(payload.error || 'Failed to update like.');
-      }
-
-      button.classList.add('like-burst');
-      window.setTimeout(() => button.classList.remove('like-burst'), 360);
-      await fetchTweets({ silent: true });
-    } catch (error) {
-      feedStatus.textContent = error.message;
-    } finally {
-      button.disabled = false;
-    }
-  }
-
-  async function signInWithGitHub() {
-    const redirectTo = new URL(window.location.href);
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'github',
-      options: {
-        redirectTo: redirectTo.toString(),
-      },
-    });
-
-    if (error) {
-      authStatus.innerHTML = `<p class="text-sm text-rose-500 dark:text-rose-300">${escapeHtml(error.message)}</p>`;
-    }
-  }
-
-  async function signInAnonymously() {
-    const { error } = await supabase.auth.signInAnonymously();
-
-    if (error) {
-      authStatus.innerHTML = `<p class="text-sm text-rose-500 dark:text-rose-300">${escapeHtml(error.message)}</p>`;
-    }
-  }
-
-  async function signOut() {
-    const { error } = await supabase.auth.signOut({ scope: 'local' });
-
-    if (error) {
-      authStatus.innerHTML = `<p class="text-sm text-rose-500 dark:text-rose-300">${escapeHtml(error.message)}</p>`;
-      return;
-    }
-
-    composerStatus.textContent = 'Signed out.';
   }
 
   function mountRealtime() {
-    supabase
-      .channel('tweet-feed')
+    realtimeChannel?.unsubscribe();
+    realtimeChannel = supabase
+      .channel('index-tweets-feed')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'tweets' }, () => {
-        fetchTweets({ silent: true });
-      })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'tweet_likes' }, () => {
         fetchTweets({ silent: true });
       })
       .subscribe();
   }
 
+  tweetInput.addEventListener('input', updateComposerState);
   tweetForm.addEventListener('submit', submitTweet);
-  tweetContent.addEventListener('input', updateSubmitState);
-  refreshFeedButton.addEventListener('click', () => fetchTweets());
-  githubLoginButton.addEventListener('click', signInWithGitHub);
-  anonLoginButton.addEventListener('click', signInAnonymously);
-  signOutButton.addEventListener('click', signOut);
-  feedList.addEventListener('click', (event) => {
-    const button = event.target.closest('[data-like-id]');
+  refreshButton.addEventListener('click', () => fetchTweets());
 
-    if (!button) {
-      return;
-    }
-
-    toggleLike(button.dataset.likeId, button);
+  supabase.auth.onAuthStateChange((_event, nextSession) => {
+    session = nextSession;
+    sessionLabel.textContent = nextSession
+      ? `匿名用户 ${nextSession.user.id.slice(0, 8)}`
+      : '未建立会话';
+    updateComposerState();
   });
 
-  supabase.auth.onAuthStateChange((_event, session) => {
-    currentSession = session;
-    renderAuth();
-    fetchTweets({ silent: true });
-  });
+  updateComposerState();
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-
-  currentSession = session;
-  renderAuth();
-  updateSubmitState();
-  mountRealtime();
-  fetchTweets();
-  window.setInterval(() => fetchTweets({ silent: true }), 15000);
-</script>  </body></html>
+  try {
+    await ensureSession();
+    mountRealtime();
+    await fetchTweets();
+  } catch (error) {
+    updateComposerState();
+    sessionLabel.textContent = '连接失败';
+    composerHint.textContent = 'Supabase 初始化失败';
+    composerStatus.textContent = error.message;
+    feedStatus.textContent = error.message;
+  }
+</script>

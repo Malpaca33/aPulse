@@ -1,8 +1,403 @@
 ---
-import TweetApp from '../components/TweetApp.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
-<BaseLayout title="Minimal Social">
-  <TweetApp />
+<BaseLayout title="X Feed | Astro + Supabase">
+  <section class="min-h-screen bg-black text-white">
+    <div class="mx-auto grid min-h-screen max-w-7xl grid-cols-1 xl:grid-cols-[17rem_minmax(0,1fr)_22rem]">
+      <aside class="hidden border-r border-white/10 px-6 py-8 xl:block">
+        <div class="sticky top-0 space-y-8">
+          <a
+            href="/"
+            class="inline-flex h-14 w-14 items-center justify-center rounded-full border border-white/10 bg-white/[0.06] text-2xl font-black tracking-tight text-white transition hover:scale-[1.02] hover:bg-white/[0.1]"
+            aria-label="Home"
+          >
+            X
+          </a>
+
+          <nav class="space-y-2">
+            <a href="#composer" class="flex items-center gap-3 rounded-full px-4 py-3 text-base font-semibold transition hover:bg-white/[0.06]">
+              <span class="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/[0.06] text-lg">⌂</span>
+              <span>主页</span>
+            </a>
+            <a href="#timeline" class="flex items-center gap-3 rounded-full px-4 py-3 text-base font-semibold text-white/70 transition hover:bg-white/[0.06] hover:text-white">
+              <span class="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/[0.06] text-lg">#</span>
+              <span>时间线</span>
+            </a>
+            <a href="#status-card" class="flex items-center gap-3 rounded-full px-4 py-3 text-base font-semibold text-white/70 transition hover:bg-white/[0.06] hover:text-white">
+              <span class="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/[0.06] text-lg">@</span>
+              <span>会话</span>
+            </a>
+          </nav>
+
+          <div id="status-card" class="rounded-3xl border border-white/10 bg-white/[0.04] p-5 shadow-[0_0_0_1px_rgba(255,255,255,0.02)] backdrop-blur">
+            <p class="text-[11px] font-semibold uppercase tracking-[0.35em] text-cyan-400">Supabase</p>
+            <p class="mt-3 text-lg font-semibold text-white">实时状态</p>
+            <p id="session-label" class="mt-2 text-sm text-white/65">正在初始化匿名会话...</p>
+          </div>
+        </div>
+      </aside>
+
+      <main class="min-w-0 border-x border-white/10">
+        <header class="sticky top-0 z-20 border-b border-white/10 bg-black/80 backdrop-blur-xl">
+          <div class="px-4 py-4 sm:px-6">
+            <p class="text-[11px] font-semibold uppercase tracking-[0.35em] text-cyan-400">For You</p>
+            <div class="mt-2 flex items-end justify-between gap-4">
+              <div>
+                <h1 class="text-2xl font-black tracking-tight text-white">Home</h1>
+                <p class="mt-1 text-sm text-white/55">Astro + Supabase 的实时推文流</p>
+              </div>
+              <button
+                id="refresh-button"
+                type="button"
+                class="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-white/80 transition hover:border-cyan-400/40 hover:bg-cyan-400/10 hover:text-white"
+              >
+                刷新
+              </button>
+            </div>
+          </div>
+        </header>
+
+        <section id="composer" class="relative overflow-hidden border-b border-white/10">
+          <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.14),transparent_45%),linear-gradient(180deg,rgba(255,255,255,0.03),transparent)]"></div>
+          <div class="relative px-4 py-5 sm:px-6">
+            <div class="flex items-start gap-4">
+              <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-cyan-400/20 bg-cyan-400/10 text-sm font-black uppercase text-cyan-300">
+                ME
+              </div>
+              <div class="min-w-0 flex-1">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <p class="text-lg font-semibold text-white">有什么新鲜事？</p>
+                    <p id="composer-hint" class="mt-1 text-sm text-white/55">正在连接 Supabase...</p>
+                  </div>
+                  <div id="char-count" class="inline-flex rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-xs font-semibold text-white/60">
+                    0 / 280
+                  </div>
+                </div>
+
+                <form id="tweet-form" class="mt-4">
+                  <label class="block">
+                    <span class="sr-only">推文内容</span>
+                    <textarea
+                      id="tweet-input"
+                      rows="5"
+                      maxlength="280"
+                      placeholder="分享你的构建进度、想法或灵感..."
+                      class="min-h-[9rem] w-full resize-none border-0 bg-transparent px-0 text-lg leading-8 text-white outline-none placeholder:text-white/30 focus:ring-0"
+                    ></textarea>
+                  </label>
+
+                  <div class="mt-4 flex flex-col gap-3 border-t border-white/10 pt-4 sm:flex-row sm:items-center sm:justify-between">
+                    <p id="composer-status" class="text-sm text-white/55">自动匿名登录后即可直接发帖。</p>
+                    <button
+                      id="submit-button"
+                      type="submit"
+                      class="inline-flex items-center justify-center rounded-full bg-cyan-500 px-5 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-white/35"
+                    >
+                      发帖
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="timeline">
+          <div class="border-b border-white/10 px-4 py-3 text-sm text-white/55 sm:px-6">
+            <p id="feed-status">正在加载最新推文...</p>
+          </div>
+          <div id="feed-list" class="divide-y divide-white/10"></div>
+        </section>
+      </main>
+
+      <aside class="hidden px-6 py-8 xl:block">
+        <div class="sticky top-0 space-y-5">
+          <section class="rounded-3xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur">
+            <p class="text-[11px] font-semibold uppercase tracking-[0.35em] text-cyan-400">Now</p>
+            <h2 class="mt-3 text-xl font-bold text-white">构建提示</h2>
+            <div class="mt-4 space-y-3 text-sm text-white/65">
+              <p class="rounded-2xl border border-white/10 bg-white/[0.03] p-4">发帖直接通过 `@supabase/supabase-js` 写入 `tweets` 表。</p>
+              <p class="rounded-2xl border border-white/10 bg-white/[0.03] p-4">列表实时订阅 `public.tweets`，默认按 `created_at desc` 排列。</p>
+              <p class="rounded-2xl border border-white/10 bg-white/[0.03] p-4">视觉层采用深色、模糊玻璃和高对比边框，贴近 X 的节奏。</p>
+            </div>
+          </section>
+
+          <section class="rounded-3xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur">
+            <p class="text-[11px] font-semibold uppercase tracking-[0.35em] text-cyan-400">Live</p>
+            <h2 class="mt-3 text-xl font-bold text-white">时间线策略</h2>
+            <p class="mt-3 text-sm leading-7 text-white/65">
+              页面初始化时会自动创建匿名会话，这样无需额外交互就能满足 `tweets.user_id` 的写入约束。
+            </p>
+          </section>
+        </div>
+      </aside>
+    </div>
+  </section>
 </BaseLayout>
+
+<script type="module">
+  import { createBrowserSupabase } from '../lib/supabase.js';
+
+  const supabase = createBrowserSupabase();
+  const tweetForm = document.querySelector('#tweet-form');
+  const tweetInput = document.querySelector('#tweet-input');
+  const submitButton = document.querySelector('#submit-button');
+  const refreshButton = document.querySelector('#refresh-button');
+  const feedList = document.querySelector('#feed-list');
+  const feedStatus = document.querySelector('#feed-status');
+  const composerHint = document.querySelector('#composer-hint');
+  const composerStatus = document.querySelector('#composer-status');
+  const sessionLabel = document.querySelector('#session-label');
+  const charCount = document.querySelector('#char-count');
+  const relativeTimeFormatter = new Intl.RelativeTimeFormat('zh-CN', { numeric: 'auto' });
+
+  let session = null;
+  let refreshInFlight = false;
+  let realtimeChannel = null;
+
+  function escapeHtml(value) {
+    return String(value)
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#39;');
+  }
+
+  function formatAuthor(userId) {
+    if (!userId) {
+      return 'Unknown';
+    }
+
+    if (session?.user?.id === userId) {
+      return '你';
+    }
+
+    return `@${userId.slice(0, 8)}`;
+  }
+
+  function formatRelativeTime(value) {
+    const now = Date.now();
+    const target = new Date(value).getTime();
+    const diffSeconds = Math.round((target - now) / 1000);
+    const ranges = [
+      { unit: 'day', seconds: 86400 },
+      { unit: 'hour', seconds: 3600 },
+      { unit: 'minute', seconds: 60 },
+      { unit: 'second', seconds: 1 },
+    ];
+
+    for (const range of ranges) {
+      if (Math.abs(diffSeconds) >= range.seconds || range.unit === 'second') {
+        return relativeTimeFormatter.format(Math.round(diffSeconds / range.seconds), range.unit);
+      }
+    }
+
+    return '刚刚';
+  }
+
+  function updateComposerState() {
+    const length = tweetInput.value.trim().length;
+    const ready = Boolean(session) && length > 0 && length <= 280;
+
+    charCount.textContent = `${length} / 280`;
+    submitButton.disabled = !ready;
+
+    if (!session) {
+      composerHint.textContent = '正在建立匿名会话...';
+      composerStatus.textContent = 'Supabase 会话准备好后即可发帖。';
+      return;
+    }
+
+    composerHint.textContent = `当前身份 ${session.user.id.slice(0, 8)}`;
+
+    if (!length) {
+      composerStatus.textContent = '输入一些内容，然后直接发帖。';
+      return;
+    }
+
+    composerStatus.textContent = '内容已就绪。';
+  }
+
+  function renderTweets(tweets) {
+    if (!tweets.length) {
+      feedList.innerHTML = `
+        <article class="px-4 py-12 sm:px-6">
+          <div class="rounded-3xl border border-dashed border-white/15 bg-white/[0.03] px-6 py-10 text-center text-white/50">
+            还没有推文，发出第一条吧。
+          </div>
+        </article>
+      `;
+      return;
+    }
+
+    feedList.innerHTML = tweets
+      .map((tweet) => {
+        const author = formatAuthor(tweet.user_id);
+        const badge = escapeHtml(author.replace('@', '').slice(0, 2).toUpperCase());
+        const timestamp = new Date(tweet.created_at).toLocaleString('zh-CN', {
+          hour12: false,
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+        });
+
+        return `
+          <article class="group px-4 py-4 transition hover:bg-white/[0.03] sm:px-6">
+            <div class="flex items-start gap-4">
+              <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.05] text-sm font-black text-white/80">
+                ${badge}
+              </div>
+              <div class="min-w-0 flex-1">
+                <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                  <span class="text-sm font-semibold text-white">${escapeHtml(author)}</span>
+                  <span class="text-sm text-white/25">·</span>
+                  <span class="text-sm text-white/45">${escapeHtml(formatRelativeTime(tweet.created_at))}</span>
+                  <span class="text-sm text-white/25">·</span>
+                  <span class="text-sm text-white/35">${escapeHtml(timestamp)}</span>
+                </div>
+                <p class="mt-3 whitespace-pre-wrap text-[15px] leading-7 text-white/85">${escapeHtml(tweet.content)}</p>
+              </div>
+            </div>
+          </article>
+        `;
+      })
+      .join('');
+  }
+
+  async function ensureSession() {
+    const {
+      data: { session: existingSession },
+    } = await supabase.auth.getSession();
+
+    if (existingSession) {
+      session = existingSession;
+      sessionLabel.textContent = `匿名用户 ${existingSession.user.id.slice(0, 8)}`;
+      updateComposerState();
+      return existingSession;
+    }
+
+    const { data, error } = await supabase.auth.signInAnonymously();
+
+    if (error) {
+      throw error;
+    }
+
+    session = data.session ?? null;
+
+    if (!session) {
+      throw new Error('匿名会话创建失败。');
+    }
+
+    sessionLabel.textContent = session
+      ? `匿名用户 ${session.user.id.slice(0, 8)}`
+      : '匿名会话已创建';
+    updateComposerState();
+    return session;
+  }
+
+  async function fetchTweets({ silent = false } = {}) {
+    if (refreshInFlight) {
+      return;
+    }
+
+    refreshInFlight = true;
+
+    if (!silent) {
+      feedStatus.textContent = '正在同步最新推文...';
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('tweets')
+        .select('id, content, created_at, user_id')
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      if (error) {
+        throw error;
+      }
+
+      renderTweets(data ?? []);
+      feedStatus.textContent = `已更新 ${formatRelativeTime(new Date().toISOString())}`;
+    } catch (error) {
+      feedStatus.textContent = error.message;
+    } finally {
+      refreshInFlight = false;
+    }
+  }
+
+  async function submitTweet(event) {
+    event.preventDefault();
+
+    const content = tweetInput.value.trim();
+
+    if (!content) {
+      composerStatus.textContent = '先输入内容再发帖。';
+      return;
+    }
+
+    submitButton.disabled = true;
+    composerStatus.textContent = '正在发帖...';
+
+    try {
+      const currentSession = await ensureSession();
+
+      const { error } = await supabase.from('tweets').insert({
+        content,
+        user_id: currentSession.user.id,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      tweetInput.value = '';
+      updateComposerState();
+      composerStatus.textContent = '发帖成功。';
+      await fetchTweets({ silent: true });
+    } catch (error) {
+      updateComposerState();
+      composerStatus.textContent = error.message;
+    }
+  }
+
+  function mountRealtime() {
+    realtimeChannel?.unsubscribe();
+    realtimeChannel = supabase
+      .channel('index-tweets-feed')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'tweets' }, () => {
+        fetchTweets({ silent: true });
+      })
+      .subscribe();
+  }
+
+  tweetInput.addEventListener('input', updateComposerState);
+  tweetForm.addEventListener('submit', submitTweet);
+  refreshButton.addEventListener('click', () => fetchTweets());
+
+  supabase.auth.onAuthStateChange((_event, nextSession) => {
+    session = nextSession;
+    sessionLabel.textContent = nextSession
+      ? `匿名用户 ${nextSession.user.id.slice(0, 8)}`
+      : '未建立会话';
+    updateComposerState();
+  });
+
+  updateComposerState();
+
+  try {
+    await ensureSession();
+    mountRealtime();
+    await fetchTweets();
+  } catch (error) {
+    updateComposerState();
+    sessionLabel.textContent = '连接失败';
+    composerHint.textContent = 'Supabase 初始化失败';
+    composerStatus.textContent = error.message;
+    feedStatus.textContent = error.message;
+  }
+</script>
