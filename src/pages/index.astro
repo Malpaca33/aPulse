@@ -83,15 +83,30 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                     <textarea
                       id="tweet-input"
                       rows="5"
-                      maxlength="280"
                       placeholder="分享你的构建进度、想法或灵感..."
                       class="min-h-[9rem] w-full resize-none border-0 bg-transparent px-0 text-lg leading-8 text-white outline-none placeholder:text-white/30 focus:ring-0"
                     ></textarea>
                   </label>
 
+                  <input id="image-input" type="file" accept="image/*" class="hidden" />
+
                   <div class="mt-4 flex flex-col gap-3 border-t border-white/10 pt-4 sm:flex-row sm:items-center sm:justify-between">
                     <div class="space-y-3">
-                      <p id="composer-status" class="text-sm text-white/55">自动匿名登录后即可直接发帖。</p>
+                      <div class="flex flex-wrap items-center gap-2">
+                        <button
+                          id="media-picker-button"
+                          type="button"
+                          class="inline-flex h-11 w-11 items-center justify-center rounded-full border border-sky-400/20 bg-sky-400/10 text-sky-300 transition hover:border-sky-300/40 hover:bg-sky-400/15 hover:text-sky-200"
+                          aria-label="选择图片"
+                        >
+                          <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M4 7.5A2.5 2.5 0 0 1 6.5 5h11A2.5 2.5 0 0 1 20 7.5v9A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5v-9Z" />
+                            <path d="M8.5 13.5 11 11l2.4 2.4 1.9-1.9L20 16.2" />
+                            <circle cx="9" cy="9" r="1.2" fill="currentColor" stroke="none" />
+                          </svg>
+                        </button>
+                        <p id="composer-status" class="text-sm text-white/55">自动匿名登录后即可直接发帖。</p>
+                      </div>
                       <div class="flex flex-wrap gap-2">
                         <button
                           id="anon-login-button"
@@ -109,13 +124,33 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                         </button>
                       </div>
                     </div>
-                    <button
-                      id="submit-button"
-                      type="submit"
-                      class="inline-flex items-center justify-center rounded-full bg-cyan-500 px-5 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-white/35"
-                    >
-                      发帖
-                    </button>
+                    <div class="flex items-center gap-3 self-end sm:self-auto">
+                      <div class="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5">
+                        <svg viewBox="0 0 36 36" class="h-10 w-10 -rotate-90">
+                          <circle cx="18" cy="18" r="15.5" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="3"></circle>
+                          <circle
+                            id="char-ring-progress"
+                            cx="18"
+                            cy="18"
+                            r="15.5"
+                            fill="none"
+                            stroke="#38bdf8"
+                            stroke-width="3"
+                            stroke-linecap="round"
+                            stroke-dasharray="97.39"
+                            stroke-dashoffset="97.39"
+                          ></circle>
+                        </svg>
+                        <span id="char-ring-label" class="min-w-[2rem] text-right text-sm font-semibold text-white/70">0</span>
+                      </div>
+                      <button
+                        id="submit-button"
+                        type="submit"
+                        class="inline-flex items-center justify-center rounded-full bg-cyan-500 px-5 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-white/35"
+                      >
+                        发帖
+                      </button>
+                    </div>
                   </div>
                 </form>
               </div>
@@ -162,6 +197,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   const tweetInput = document.querySelector('#tweet-input');
   const submitButton = document.querySelector('#submit-button');
   const refreshButton = document.querySelector('#refresh-button');
+  const imageInput = document.querySelector('#image-input');
+  const mediaPickerButton = document.querySelector('#media-picker-button');
   const anonLoginButton = document.querySelector('#anon-login-button');
   const githubLoginButton = document.querySelector('#github-login-button');
   const feedList = document.querySelector('#feed-list');
@@ -170,7 +207,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   const composerStatus = document.querySelector('#composer-status');
   const sessionLabel = document.querySelector('#session-label');
   const charCount = document.querySelector('#char-count');
+  const charRingProgress = document.querySelector('#char-ring-progress');
+  const charRingLabel = document.querySelector('#char-ring-label');
   const relativeTimeFormatter = new Intl.RelativeTimeFormat('zh-CN', { numeric: 'auto' });
+  const MAX_TWEET_LENGTH = 280;
+  const WARNING_TWEET_LENGTH = 260;
+  const CHAR_RING_CIRCUMFERENCE = 97.39;
 
   let session = null;
   let refreshInFlight = false;
@@ -237,10 +279,29 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   }
 
   function updateComposerState() {
-    const length = tweetInput.value.trim().length;
-    const ready = Boolean(session) && length > 0 && length <= 280;
+    const rawLength = tweetInput.value.length;
+    const trimmedLength = tweetInput.value.trim().length;
+    const ready = Boolean(session) && trimmedLength > 0 && rawLength <= MAX_TWEET_LENGTH;
+    const isNearLimit = rawLength > WARNING_TWEET_LENGTH && rawLength <= MAX_TWEET_LENGTH;
+    const isOverLimit = rawLength > MAX_TWEET_LENGTH;
+    const progress = Math.min(rawLength, MAX_TWEET_LENGTH) / MAX_TWEET_LENGTH;
+    const strokeColor = isOverLimit ? '#fb7185' : isNearLimit ? '#fb923c' : '#38bdf8';
+    const ringOffset = CHAR_RING_CIRCUMFERENCE * (1 - progress);
 
-    charCount.textContent = `${length} / 280`;
+    charCount.textContent = `${rawLength} / ${MAX_TWEET_LENGTH}`;
+    charCount.className = isOverLimit
+      ? 'inline-flex rounded-full border border-rose-400/30 bg-rose-500/10 px-3 py-1 text-xs font-semibold text-rose-300'
+      : isNearLimit
+        ? 'inline-flex rounded-full border border-orange-400/30 bg-orange-500/10 px-3 py-1 text-xs font-semibold text-orange-200'
+        : 'inline-flex rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-xs font-semibold text-white/60';
+    charRingProgress.style.stroke = strokeColor;
+    charRingProgress.style.strokeDashoffset = `${ringOffset}`;
+    charRingLabel.textContent = `${rawLength}`;
+    charRingLabel.className = isOverLimit
+      ? 'min-w-[2rem] text-right text-sm font-semibold text-rose-300'
+      : isNearLimit
+        ? 'min-w-[2rem] text-right text-sm font-semibold text-orange-200'
+        : 'min-w-[2rem] text-right text-sm font-semibold text-white/70';
     submitButton.disabled = !ready;
     anonLoginButton.classList.toggle('hidden', Boolean(session));
     githubLoginButton.classList.toggle('hidden', Boolean(session));
@@ -254,8 +315,18 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     authErrorMessage = '';
     composerHint.textContent = `当前身份 ${session.user.id.slice(0, 8)}`;
 
-    if (!length) {
+    if (!trimmedLength) {
       composerStatus.textContent = '输入一些内容，然后直接发帖。';
+      return;
+    }
+
+    if (isOverLimit) {
+      composerStatus.textContent = `内容超出 ${rawLength - MAX_TWEET_LENGTH} 个字符，请精简后再发布。`;
+      return;
+    }
+
+    if (isNearLimit) {
+      composerStatus.textContent = `还可输入 ${MAX_TWEET_LENGTH - rawLength} 个字符。`;
       return;
     }
 
@@ -454,6 +525,15 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   tweetInput.addEventListener('input', updateComposerState);
   tweetForm.addEventListener('submit', submitTweet);
   refreshButton.addEventListener('click', () => fetchTweets());
+  mediaPickerButton.addEventListener('click', () => imageInput.click());
+  imageInput.addEventListener('change', () => {
+    if (imageInput.files?.[0]) {
+      composerStatus.textContent = `已选择图片：${imageInput.files[0].name}`;
+      return;
+    }
+
+    updateComposerState();
+  });
   anonLoginButton.addEventListener('click', signInAnonymously);
   githubLoginButton.addEventListener('click', signInWithGitHub);
 
