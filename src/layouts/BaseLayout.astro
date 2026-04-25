@@ -1,7 +1,10 @@
 ---
 import '../styles/global.css';
 
-const { title = 'Minimal Social' } = Astro.props;
+const {
+  title = 'aPulse | 发现世界的新跳动。',
+  description = 'aPulse | 发现世界的新跳动。',
+} = Astro.props;
 ---
 
 <!doctype html>
@@ -9,7 +12,10 @@ const { title = 'Minimal Social' } = Astro.props;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#020617" />
     <title>{title}</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   </head>
   <body>
     <slot />

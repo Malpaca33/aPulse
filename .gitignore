@@ -1,0 +1,4 @@
+node_modules/.vite/
+dist/_astro/
+dist/_worker.js/chunks/
+dist/_worker.js/manifest_*.mjs
