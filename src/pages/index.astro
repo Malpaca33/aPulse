@@ -89,6 +89,30 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                   </label>
 
                   <input id="image-input" type="file" accept="image/*" class="hidden" />
+                  <div id="image-preview-panel" class="mt-4 hidden overflow-hidden rounded-[1.75rem] border border-white/10 bg-white/[0.04]">
+                    <div class="flex items-center justify-between border-b border-white/10 px-4 py-3">
+                      <p class="text-sm font-semibold text-white/80">图片预览</p>
+                      <button
+                        id="remove-image-button"
+                        type="button"
+                        class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-white/70 transition hover:border-rose-300/40 hover:bg-rose-500/10 hover:text-rose-200"
+                        aria-label="取消已选图片"
+                      >
+                        <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                          <path d="M18 6 6 18" />
+                          <path d="m6 6 12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                    <div class="p-4">
+                      <img
+                        id="image-preview"
+                        src=""
+                        alt="已选择的图片预览"
+                        class="max-h-[22rem] w-full rounded-[1.25rem] object-cover"
+                      />
+                    </div>
+                  </div>
 
                   <div class="mt-4 flex flex-col gap-3 border-t border-white/10 pt-4 sm:flex-row sm:items-center sm:justify-between">
                     <div class="space-y-3">
@@ -198,6 +222,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   const submitButton = document.querySelector('#submit-button');
   const refreshButton = document.querySelector('#refresh-button');
   const imageInput = document.querySelector('#image-input');
+  const imagePreviewPanel = document.querySelector('#image-preview-panel');
+  const imagePreview = document.querySelector('#image-preview');
+  const removeImageButton = document.querySelector('#remove-image-button');
   const mediaPickerButton = document.querySelector('#media-picker-button');
   const anonLoginButton = document.querySelector('#anon-login-button');
   const githubLoginButton = document.querySelector('#github-login-button');
@@ -218,6 +245,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   let refreshInFlight = false;
   let realtimeChannel = null;
   let authErrorMessage = '';
+  let selectedImageFile = null;
+  let selectedImagePreviewUrl = '';
 
   function escapeHtml(value) {
     return String(value)
@@ -260,6 +289,26 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     return '刚刚';
   }
 
+  function sanitizeFileName(value) {
+    return value.replace(/[^a-zA-Z0-9._-]/g, '-');
+  }
+
+  function clearImageSelection({ preserveStatus = false } = {}) {
+    if (selectedImagePreviewUrl) {
+      URL.revokeObjectURL(selectedImagePreviewUrl);
+    }
+
+    selectedImageFile = null;
+    selectedImagePreviewUrl = '';
+    imageInput.value = '';
+    imagePreview.removeAttribute('src');
+    imagePreviewPanel.classList.add('hidden');
+
+    if (!preserveStatus) {
+      updateComposerState();
+    }
+  }
+
   function toFriendlyErrorMessage(error) {
     const message = error?.message ?? '发生未知错误。';
 
@@ -281,7 +330,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   function updateComposerState() {
     const rawLength = tweetInput.value.length;
     const trimmedLength = tweetInput.value.trim().length;
-    const ready = Boolean(session) && trimmedLength > 0 && rawLength <= MAX_TWEET_LENGTH;
+    const hasMedia = Boolean(selectedImageFile);
+    const ready = Boolean(session) && (trimmedLength > 0 || hasMedia) && rawLength <= MAX_TWEET_LENGTH;
     const isNearLimit = rawLength > WARNING_TWEET_LENGTH && rawLength <= MAX_TWEET_LENGTH;
     const isOverLimit = rawLength > MAX_TWEET_LENGTH;
     const progress = Math.min(rawLength, MAX_TWEET_LENGTH) / MAX_TWEET_LENGTH;
@@ -315,13 +365,23 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     authErrorMessage = '';
     composerHint.textContent = `当前身份 ${session.user.id.slice(0, 8)}`;
 
-    if (!trimmedLength) {
+    if (!trimmedLength && !hasMedia) {
       composerStatus.textContent = '输入一些内容，然后直接发帖。';
       return;
     }
 
     if (isOverLimit) {
       composerStatus.textContent = `内容超出 ${rawLength - MAX_TWEET_LENGTH} 个字符，请精简后再发布。`;
+      return;
+    }
+
+    if (hasMedia && !trimmedLength) {
+      composerStatus.textContent = '图片已就绪，可以直接发布。';
+      return;
+    }
+
+    if (hasMedia) {
+      composerStatus.textContent = '文字与图片都已就绪。';
       return;
     }
 
@@ -371,7 +431,25 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                   <span class="text-sm text-white/25">·</span>
                   <span class="text-sm text-white/35">${escapeHtml(timestamp)}</span>
                 </div>
-                <p class="mt-3 whitespace-pre-wrap text-[15px] leading-7 text-white/85">${escapeHtml(tweet.content)}</p>
+                ${
+                  tweet.content
+                    ? `<p class="mt-3 whitespace-pre-wrap text-[15px] leading-7 text-white/85">${escapeHtml(tweet.content)}</p>`
+                    : ''
+                }
+                ${
+                  tweet.image_url
+                    ? `
+                      <div class="mt-4 overflow-hidden rounded-[1.5rem] border border-white/10 bg-white/[0.03]">
+                        <img
+                          src="${escapeHtml(tweet.image_url)}"
+                          alt="tweet image"
+                          loading="lazy"
+                          class="max-h-[30rem] w-full object-cover"
+                        />
+                      </div>
+                    `
+                    : ''
+                }
               </div>
             </div>
           </article>
@@ -426,7 +504,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     try {
       const { data, error } = await supabase
         .from('tweets')
-        .select('id, content, created_at, user_id')
+        .select('id, content, image_url, created_at, user_id')
         .order('created_at', { ascending: false })
         .limit(50);
 
@@ -448,13 +526,13 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
     const content = tweetInput.value.trim();
 
-    if (!content) {
-      composerStatus.textContent = '先输入内容再发帖。';
+    if (!content && !selectedImageFile) {
+      composerStatus.textContent = '先输入内容或选择图片再发帖。';
       return;
     }
 
     submitButton.disabled = true;
-    composerStatus.textContent = '正在发帖...';
+    composerStatus.textContent = selectedImageFile ? '正在上传图片并发帖...' : '正在发帖...';
 
     try {
       const currentSession = await ensureSession();
@@ -464,15 +542,41 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         return;
       }
 
+      let imageUrl = null;
+      let uploadedPath = null;
+
+      if (selectedImageFile) {
+        const fileName = sanitizeFileName(selectedImageFile.name || 'image');
+        uploadedPath = `${currentSession.user.id}/${Date.now()}-${fileName}`;
+        const { error: uploadError } = await supabase.storage.from('images').upload(uploadedPath, selectedImageFile, {
+          cacheControl: '3600',
+          upsert: false,
+          contentType: selectedImageFile.type || undefined,
+        });
+
+        if (uploadError) {
+          throw new Error(uploadError.message);
+        }
+
+        const { data: publicUrlData } = supabase.storage.from('images').getPublicUrl(uploadedPath);
+        imageUrl = publicUrlData.publicUrl;
+      }
+
       const { error } = await supabase.from('tweets').insert({
         content,
+        image_url: imageUrl,
       });
 
       if (error) {
+        if (uploadedPath) {
+          await supabase.storage.from('images').remove([uploadedPath]);
+        }
+
         throw new Error(toFriendlyErrorMessage(error));
       }
 
       tweetInput.value = '';
+      clearImageSelection({ preserveStatus: true });
       updateComposerState();
       composerStatus.textContent = '发帖成功。';
       await fetchTweets({ silent: true });
@@ -527,13 +631,27 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   refreshButton.addEventListener('click', () => fetchTweets());
   mediaPickerButton.addEventListener('click', () => imageInput.click());
   imageInput.addEventListener('change', () => {
-    if (imageInput.files?.[0]) {
-      composerStatus.textContent = `已选择图片：${imageInput.files[0].name}`;
+    const nextImage = imageInput.files?.[0];
+
+    if (!nextImage) {
+      clearImageSelection();
       return;
     }
 
+    if (!nextImage.type.startsWith('image/')) {
+      composerStatus.textContent = '只能选择图片文件。';
+      clearImageSelection({ preserveStatus: true });
+      return;
+    }
+
+    clearImageSelection({ preserveStatus: true });
+    selectedImageFile = nextImage;
+    selectedImagePreviewUrl = URL.createObjectURL(nextImage);
+    imagePreview.src = selectedImagePreviewUrl;
+    imagePreviewPanel.classList.remove('hidden');
     updateComposerState();
   });
+  removeImageButton.addEventListener('click', () => clearImageSelection());
   anonLoginButton.addEventListener('click', signInAnonymously);
   githubLoginButton.addEventListener('click', signInWithGitHub);
 

@@ -15,12 +15,16 @@ function normalizeContent(value) {
   return typeof value === 'string' ? value.trim() : '';
 }
 
+function normalizeImageUrl(value) {
+  return typeof value === 'string' && value.trim() ? value.trim() : null;
+}
+
 export async function GET({ request }) {
   const { user, supabase } = await getUserFromRequest(request);
 
   const { data: tweets, error } = await supabase
     .from('tweets')
-    .select('id, content, created_at, user_id, likes_count')
+    .select('id, content, image_url, created_at, user_id, likes_count')
     .order('created_at', { ascending: false })
     .limit(50);
 
@@ -67,9 +71,10 @@ export async function POST({ request }) {
   }
 
   const content = normalizeContent(body?.content);
+  const imageUrl = normalizeImageUrl(body?.image_url);
 
-  if (!content) {
-    return json({ error: 'Tweet content cannot be empty.' }, { status: 400 });
+  if (!content && !imageUrl) {
+    return json({ error: 'Tweet content or image is required.' }, { status: 400 });
   }
 
   if (content.length > 280) {
@@ -80,8 +85,9 @@ export async function POST({ request }) {
     .from('tweets')
     .insert({
       content,
+      image_url: imageUrl,
     })
-    .select('id, content, created_at, user_id, likes_count')
+    .select('id, content, image_url, created_at, user_id, likes_count')
     .single();
 
   if (error) {
