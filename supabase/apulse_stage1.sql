@@ -1,16 +1,10 @@
 create extension if not exists pgcrypto;
 
-create table if not exists public.tweets (
-  id uuid primary key default gen_random_uuid(),
-  content text not null check (char_length(content) <= 280),
-  image_url text,
-  created_at timestamptz not null default timezone('utc'::text, now()),
-  user_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
-  likes_count integer not null default 0 check (likes_count >= 0)
-);
+alter table public.tweets
+add column if not exists image_url text;
 
-create index if not exists tweets_created_at_idx on public.tweets (created_at desc);
-create index if not exists tweets_user_id_idx on public.tweets (user_id);
+alter table public.tweets
+alter column user_id set default auth.uid();
 
 create table if not exists public.tweet_likes (
   tweet_id uuid not null references public.tweets(id) on delete cascade,
@@ -20,12 +14,6 @@ create table if not exists public.tweet_likes (
 );
 
 create index if not exists tweet_likes_user_id_idx on public.tweet_likes (user_id);
-
-insert into storage.buckets (id, name, public)
-values ('images', 'images', true)
-on conflict (id) do update
-set name = excluded.name,
-    public = excluded.public;
 
 create or replace function public.sync_tweet_likes_count()
 returns trigger
@@ -70,14 +58,6 @@ for each row execute function public.sync_tweet_likes_count();
 
 alter table public.tweets enable row level security;
 alter table public.tweet_likes enable row level security;
-alter table public.tweets alter column user_id set default auth.uid();
-alter table public.tweets add column if not exists image_url text;
-
-drop policy if exists "tweets are publicly readable" on public.tweets;
-create policy "tweets are publicly readable"
-on public.tweets
-for select
-using (true);
 
 do $$
 declare
@@ -95,11 +75,44 @@ begin
 end
 $$;
 
+drop policy if exists "tweets are publicly readable" on public.tweets;
+create policy "tweets are publicly readable"
+on public.tweets
+for select
+using (true);
+
 create policy "signed in users can post tweets"
 on public.tweets
 for insert
 to public
 with check (auth.uid() is not null and auth.uid() = user_id);
+
+drop policy if exists "users can see their own likes" on public.tweet_likes;
+create policy "users can see their own likes"
+on public.tweet_likes
+for select
+to authenticated
+using (auth.uid() = user_id);
+
+drop policy if exists "users can like a tweet once" on public.tweet_likes;
+create policy "users can like a tweet once"
+on public.tweet_likes
+for insert
+to authenticated
+with check (auth.uid() = user_id);
+
+drop policy if exists "users can remove their own likes" on public.tweet_likes;
+create policy "users can remove their own likes"
+on public.tweet_likes
+for delete
+to authenticated
+using (auth.uid() = user_id);
+
+insert into storage.buckets (id, name, public)
+values ('images', 'images', true)
+on conflict (id) do update
+set name = excluded.name,
+    public = excluded.public;
 
 drop policy if exists "public can read images bucket" on storage.objects;
 create policy "public can read images bucket"
@@ -145,27 +158,6 @@ using (
   and auth.uid() is not null
   and (storage.foldername(name))[1] = auth.uid()::text
 );
-
-drop policy if exists "users can see their own likes" on public.tweet_likes;
-create policy "users can see their own likes"
-on public.tweet_likes
-for select
-to authenticated
-using (auth.uid() = user_id);
-
-drop policy if exists "users can like a tweet once" on public.tweet_likes;
-create policy "users can like a tweet once"
-on public.tweet_likes
-for insert
-to authenticated
-with check (auth.uid() = user_id);
-
-drop policy if exists "users can remove their own likes" on public.tweet_likes;
-create policy "users can remove their own likes"
-on public.tweet_likes
-for delete
-to authenticated
-using (auth.uid() = user_id);
 
 do $$
 begin
