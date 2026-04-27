@@ -3,15 +3,15 @@
 @tailwind utilities;
 
 html {
-  color-scheme: light dark;
+  color-scheme: dark;
   scroll-behavior: smooth;
 }
 
 body {
   margin: 0;
   font-family: "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  background: #f8fafc;
-  color: #0f172a;
+  background: #000;
+  color: #fff;
 }
 
 body::selection {

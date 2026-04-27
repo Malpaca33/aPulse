@@ -29,12 +29,38 @@ import BaseLayout from '../layouts/BaseLayout.astro';
               <span class="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/[0.06] text-lg">@</span>
               <span>会话</span>
             </a>
+            <a href="/" class="flex items-center gap-3 rounded-full px-4 py-3 text-base font-semibold text-white/70 transition hover:bg-white/[0.06] hover:text-white">
+              <span class="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/[0.06] text-lg">🔖</span>
+              <span>书签</span>
+            </a>
+            <a href="#" id="nav-notifications" class="flex items-center gap-3 rounded-full px-4 py-3 text-base font-semibold text-white/70 transition hover:bg-white/[0.06] hover:text-white">
+              <span class="relative inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/[0.06] text-lg">
+                🔔
+                <span id="notif-badge" class="absolute -right-0.5 -top-0.5 hidden h-4 min-w-[1rem] items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold leading-none text-white shadow">0</span>
+              </span>
+              <span>通知</span>
+            </a>
           </nav>
 
+          <div id="notif-panel" class="hidden rounded-3xl border border-white/10 bg-zinc-900 p-4 shadow-2xl">
+            <div class="mb-3 flex items-center justify-between">
+              <h3 class="text-sm font-bold text-white">通知</h3>
+              <button id="notif-mark-read" type="button" class="text-xs text-cyan-400 transition hover:text-cyan-300">全部已读</button>
+            </div>
+            <div id="notif-list" class="max-h-80 space-y-2 overflow-y-auto">
+              <p class="py-4 text-center text-xs text-white/40">暂无通知。</p>
+            </div>
+          </div>
+
           <div id="status-card" class="rounded-3xl border border-white/10 bg-white/[0.04] p-5 shadow-[0_0_0_1px_rgba(255,255,255,0.02)] backdrop-blur">
-            <p class="text-[11px] font-semibold uppercase tracking-[0.35em] text-cyan-400">Supabase</p>
-            <p class="mt-3 text-lg font-semibold text-white">实时状态</p>
-            <p id="session-label" class="mt-2 text-sm text-white/65">正在初始化匿名会话...</p>
+            <p class="text-[11px] font-semibold uppercase tracking-[0.35em] text-cyan-400">身份</p>
+            <p id="session-label" class="mt-3 text-base font-bold text-white">正在初始化...</p>
+            <p id="session-identity" class="mt-0.5 text-xs text-white/40"></p>
+            <div id="sidebar-login-buttons" class="mt-3 flex flex-wrap gap-2">
+              <button id="google-login-button" type="button" class="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-semibold text-white/70 transition hover:border-sky-400/40 hover:bg-sky-400/10 hover:text-white">Google</button>
+              <button id="anon-login-button" type="button" class="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-semibold text-white/70 transition hover:border-cyan-400/40 hover:bg-cyan-400/10 hover:text-white">匿名</button>
+              <button id="edit-profile-button" type="button" class="rounded-full border border-amber-400/20 bg-amber-400/10 px-3 py-1.5 text-xs font-semibold text-amber-300/80 transition hover:border-amber-300/40 hover:bg-amber-400/15 hover:text-amber-200">✏️ 资料</button>
+            </div>
           </div>
         </div>
       </aside>
@@ -131,22 +157,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                         </button>
                         <p id="composer-status" class="text-sm text-white/55">自动匿名登录后即可直接发帖。</p>
                       </div>
-                      <div class="flex flex-wrap gap-2">
-                        <button
-                          id="anon-login-button"
-                          type="button"
-                          class="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-white/80 transition hover:border-cyan-400/40 hover:bg-cyan-400/10 hover:text-white"
-                        >
-                          匿名登录
-                        </button>
-                        <button
-                          id="github-login-button"
-                          type="button"
-                          class="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-white/80 transition hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
-                        >
-                          GitHub 登录
-                        </button>
-                      </div>
                     </div>
                     <div class="flex items-center gap-3 self-end sm:self-auto">
                       <div class="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5">
@@ -193,26 +203,63 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <aside class="hidden px-6 py-8 xl:block">
         <div class="sticky top-0 space-y-5">
           <section class="rounded-3xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur">
-            <p class="text-[11px] font-semibold uppercase tracking-[0.35em] text-cyan-400">Now</p>
-            <h2 class="mt-3 text-xl font-bold text-white">构建提示</h2>
-            <div class="mt-4 space-y-3 text-sm text-white/65">
-              <p class="rounded-2xl border border-white/10 bg-white/[0.03] p-4">发帖直接通过 `@supabase/supabase-js` 写入 `tweets` 表。</p>
-              <p class="rounded-2xl border border-white/10 bg-white/[0.03] p-4">列表实时订阅 `public.tweets`，默认按 `created_at desc` 排列。</p>
-              <p class="rounded-2xl border border-white/10 bg-white/[0.03] p-4">视觉层采用深色、模糊玻璃和高对比边框，贴近 X 的节奏。</p>
+            <div class="relative">
+              <input id="search-input" type="text" placeholder="搜索推文..." class="w-full rounded-full border border-white/10 bg-white/[0.05] px-4 py-2.5 pl-10 text-sm text-white outline-none placeholder:text-white/30 focus:border-cyan-400/40 focus:ring-1 focus:ring-cyan-400/20" />
+              <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            </div>
+          </section>
+          <section class="rounded-3xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur">
+            <p class="text-[11px] font-semibold uppercase tracking-[0.35em] text-cyan-400">精选</p>
+            <h2 class="mt-3 text-xl font-bold text-white">精华帖子</h2>
+            <div id="featured-list" class="mt-4 space-y-2 text-sm text-white/65">
+              <p class="text-white/40">加载中...</p>
             </div>
           </section>
 
           <section class="rounded-3xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur">
-            <p class="text-[11px] font-semibold uppercase tracking-[0.35em] text-cyan-400">Live</p>
-            <h2 class="mt-3 text-xl font-bold text-white">时间线策略</h2>
-            <p class="mt-3 text-sm leading-7 text-white/65">
-              页面初始化时会自动创建匿名会话，这样无需额外交互就能满足 `tweets.user_id` 的写入约束。
-            </p>
+            <p class="text-[11px] font-semibold uppercase tracking-[0.35em] text-cyan-400">aPulse</p>
+            <h2 class="mt-3 text-xl font-bold text-white">脉搏数据</h2>
+            <div id="stats-list" class="mt-4 space-y-3">
+              <div class="flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3">
+                <span class="text-sm text-white/65">总访问次数</span>
+                <span id="stat-page-views" class="text-sm font-semibold text-cyan-300">--</span>
+              </div>
+              <div class="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3">
+                <span class="text-sm text-white/65">社区活跃达人</span>
+                <div id="stat-top-contributors" class="mt-2 space-y-1">
+                  <p class="text-xs text-white/40">加载中...</p>
+                </div>
+              </div>
+            </div>
           </section>
         </div>
       </aside>
     </div>
   </section>
+  <!-- 个人资料编辑弹窗 -->
+  <div id="profile-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/60 backdrop-blur-sm">
+    <div class="w-full max-w-sm rounded-3xl border border-white/10 bg-zinc-900 p-6 shadow-2xl">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-bold text-white">编辑资料</h3>
+        <button id="profile-modal-close" type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-full text-white/50 transition hover:bg-white/[0.06] hover:text-white">
+          <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+      <div class="mt-5 space-y-4">
+        <div>
+          <label class="text-xs font-semibold text-white/50 uppercase tracking-wider">昵称</label>
+          <input id="profile-nickname-input" type="text" maxlength="30" class="mt-1.5 w-full rounded-xl border border-white/10 bg-white/[0.05] px-4 py-2.5 text-sm text-white outline-none placeholder:text-white/30 focus:border-cyan-400/40" placeholder="设置昵称" />
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-white/50 uppercase tracking-wider">简介</label>
+          <textarea id="profile-bio-input" rows="3" maxlength="160" class="mt-1.5 w-full resize-none rounded-xl border border-white/10 bg-white/[0.05] px-4 py-2.5 text-sm text-white outline-none placeholder:text-white/30 focus:border-cyan-400/40" placeholder="写一句简介..."></textarea>
+        </div>
+        <button id="profile-save-btn" type="button" class="w-full rounded-full bg-cyan-500 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400">保存</button>
+        <p id="profile-status" class="text-center text-xs text-white/40"></p>
+      </div>
+    </div>
+  </div>
+
   <script>
   import { createBrowserSupabase } from '../lib/supabase.js';
 
@@ -226,13 +273,22 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   const imagePreview = document.querySelector('#image-preview');
   const removeImageButton = document.querySelector('#remove-image-button');
   const mediaPickerButton = document.querySelector('#media-picker-button');
+  const googleLoginButton = document.querySelector('#google-login-button');
   const anonLoginButton = document.querySelector('#anon-login-button');
-  const githubLoginButton = document.querySelector('#github-login-button');
   const feedList = document.querySelector('#feed-list');
   const feedStatus = document.querySelector('#feed-status');
   const composerHint = document.querySelector('#composer-hint');
   const composerStatus = document.querySelector('#composer-status');
   const sessionLabel = document.querySelector('#session-label');
+  const sessionIdentity = document.querySelector('#session-identity');
+  const featuredList = document.querySelector('#featured-list');
+  const statsPageViews = document.querySelector('#stat-page-views');
+  const statsTopContributors = document.querySelector('#stat-top-contributors');
+  const notifPanel = document.querySelector('#notif-panel');
+  const notifList = document.querySelector('#notif-list');
+  const notifBadge = document.querySelector('#notif-badge');
+  const notifMarkRead = document.querySelector('#notif-mark-read');
+  const notifNav = document.querySelector('#nav-notifications');
   const charCount = document.querySelector('#char-count');
   const charRingProgress = document.querySelector('#char-ring-progress');
   const charRingLabel = document.querySelector('#char-ring-label');
@@ -247,6 +303,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   let authErrorMessage = '';
   let selectedImageFile = null;
   let selectedImagePreviewUrl = '';
+  let currentView = 'timeline'; // 'timeline' | 'bookmarks' | 'search'
 
   function escapeHtml(value) {
     return String(value)
@@ -267,6 +324,24 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     }
 
     return `@${userId.slice(0, 8)}`;
+  }
+
+  function getDisplayName(session) {
+    if (!session) return { label: '未登录', sub: '' };
+    const provider = session.user?.app_metadata?.provider;
+    const shortId = session.user.id.slice(0, 8);
+    if (provider === 'google') {
+      const email = session.user.email || '';
+      const prefix = email.split('@')[0] || shortId;
+      return { label: `🌟 正式成员`, sub: prefix };
+    }
+    return { label: `👣 游客模式`, sub: shortId };
+  }
+
+  function updateSessionLabel() {
+    const info = getDisplayName(session);
+    sessionLabel.textContent = session ? info.label : '正在初始化...';
+    sessionIdentity.textContent = session ? info.sub : '';
   }
 
   function formatRelativeTime(value) {
@@ -353,8 +428,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         ? 'min-w-[2rem] text-right text-sm font-semibold text-orange-200'
         : 'min-w-[2rem] text-right text-sm font-semibold text-white/70';
     submitButton.disabled = !ready;
-    anonLoginButton.classList.toggle('hidden', Boolean(session));
-    githubLoginButton.classList.toggle('hidden', Boolean(session));
 
     if (!session) {
       composerHint.textContent = authErrorMessage ? '当前未建立可用会话' : '正在建立匿名会话...';
@@ -393,13 +466,16 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     composerStatus.textContent = '内容已就绪。';
   }
 
-  function renderTweets(tweets) {
+  function renderTweets(tweets, likedIds = [], bookmarkedIds = [], starredIds = []) {
     if (!tweets.length) {
+      const msg = currentView === 'bookmarks'
+        ? '还没有收藏任何推文。'
+        : currentView === 'search'
+          ? '没有找到匹配的推文。'
+          : '还没有推文，发出第一条吧。';
       feedList.innerHTML = `
         <article class="px-4 py-12 sm:px-6">
-          <div class="rounded-3xl border border-dashed border-white/15 bg-white/[0.03] px-6 py-10 text-center text-white/50">
-            还没有推文，发出第一条吧。
-          </div>
+          <div class="rounded-3xl border border-dashed border-white/15 bg-white/[0.03] px-6 py-10 text-center text-white/50">${msg}</div>
         </article>
       `;
       return;
@@ -410,48 +486,65 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         const author = formatAuthor(tweet.user_id);
         const badge = escapeHtml(author.replace('@', '').slice(0, 2).toUpperCase());
         const timestamp = new Date(tweet.created_at).toLocaleString('zh-CN', {
-          hour12: false,
-          month: '2-digit',
-          day: '2-digit',
-          hour: '2-digit',
-          minute: '2-digit',
+          hour12: false, month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit',
         });
+        const isLiked = likedIds.includes(tweet.id);
+        const isBookmarked = bookmarkedIds.includes(tweet.id);
+        const isStarred = starredIds.includes(tweet.id);
+        const isOwn = session?.user?.id === tweet.user_id;
+        const comments = Array.isArray(tweet.recent_comments) ? tweet.recent_comments : [];
 
         return `
           <article class="group px-4 py-4 transition hover:bg-white/[0.03] sm:px-6">
-            <div class="flex items-start gap-4">
-              <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.05] text-sm font-black text-white/80">
-                ${badge}
-              </div>
-              <div class="min-w-0 flex-1">
-                <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
-                  <span class="text-sm font-semibold text-white">${escapeHtml(author)}</span>
-                  <span class="text-sm text-white/25">·</span>
-                  <span class="text-sm text-white/45">${escapeHtml(formatRelativeTime(tweet.created_at))}</span>
-                  <span class="text-sm text-white/25">·</span>
-                  <span class="text-sm text-white/35">${escapeHtml(timestamp)}</span>
+            <a href="/tweet/${tweet.id}" class="block">
+              <div class="flex items-start gap-4">
+                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.05] text-sm font-black text-white/80">${badge}</div>
+                <div class="min-w-0 flex-1">
+                  <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <span class="text-sm font-semibold text-white">${escapeHtml(author)}</span>
+                    <span class="text-sm text-white/25">·</span>
+                    <span class="text-sm text-white/45">${escapeHtml(formatRelativeTime(tweet.created_at))}</span>
+                    <span class="text-sm text-white/25">·</span>
+                    <span class="text-sm text-white/35">${escapeHtml(timestamp)}</span>
+                    ${tweet.is_featured ? '<span class="ml-1 text-sm">🌟</span>' : ''}
+                  </div>
+                  ${tweet.content ? `<p class="mt-3 whitespace-pre-wrap text-[15px] leading-7 text-white/85">${escapeHtml(tweet.content)}</p>` : ''}
+                  ${tweet.image_url ? `<div class="mt-4 overflow-hidden rounded-[1.5rem] border border-white/10 bg-white/[0.03]"><img src="${escapeHtml(tweet.image_url)}" alt="tweet image" loading="lazy" class="max-h-[30rem] w-full object-cover" /></div>` : ''}
                 </div>
-                ${
-                  tweet.content
-                    ? `<p class="mt-3 whitespace-pre-wrap text-[15px] leading-7 text-white/85">${escapeHtml(tweet.content)}</p>`
-                    : ''
-                }
-                ${
-                  tweet.image_url
-                    ? `
-                      <div class="mt-4 overflow-hidden rounded-[1.5rem] border border-white/10 bg-white/[0.03]">
-                        <img
-                          src="${escapeHtml(tweet.image_url)}"
-                          alt="tweet image"
-                          loading="lazy"
-                          class="max-h-[30rem] w-full object-cover"
-                        />
-                      </div>
-                    `
-                    : ''
-                }
               </div>
+            </a>
+            <div class="mt-3 flex items-center gap-6 pl-16">
+              <button type="button" data-like-id="${tweet.id}" class="like-btn inline-flex items-center gap-1.5 text-sm transition ${isLiked ? 'text-rose-300' : 'text-white/45 hover:text-rose-300'}">
+                <svg viewBox="0 0 24 24" class="h-[18px] w-[18px]" fill="${isLiked ? '#fb7185' : 'none'}" stroke="${isLiked ? '#fb7185' : 'currentColor'}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" /></svg>
+                <span>${tweet.likes_count ?? 0}</span>
+              </button>
+              <button type="button" data-star-id="${tweet.id}" class="star-btn inline-flex items-center gap-1.5 text-sm transition ${isStarred ? 'text-sky-300' : 'text-white/45 hover:text-sky-300'}">
+                <svg viewBox="0 0 24 24" class="h-[18px] w-[18px]" fill="${isStarred ? '#38bdf8' : 'none'}" stroke="${isStarred ? '#38bdf8' : 'currentColor'}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+                <span>精华</span>
+              </button>
+              <button type="button" data-bookmark-id="${tweet.id}" class="bookmark-btn inline-flex items-center gap-1.5 text-sm transition ${isBookmarked ? 'text-amber-300' : 'text-white/45 hover:text-amber-300'}">
+                <svg viewBox="0 0 24 24" class="h-[18px] w-[18px]" fill="${isBookmarked ? '#f59e0b' : 'none'}" stroke="${isBookmarked ? '#f59e0b' : 'currentColor'}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" /></svg>
+              </button>
+              ${isOwn ? `<button type="button" data-delete-id="${tweet.id}" class="delete-btn ml-auto inline-flex items-center gap-1 text-sm text-white/25 transition hover:text-rose-400" title="删除推文"><svg viewBox="0 0 24 24" class="h-[16px] w-[16px]" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg></button>` : ''}
             </div>
+            ${comments.length > 0 ? `
+            <div class="mt-3 pl-16 ml-6">
+              ${comments.map(c => {
+                const isCommentOwn = session?.user?.id === c.user_id;
+                return `
+                  <div class="border-l-2 border-white/10 py-2 pl-4 group/comment">
+                    <div class="flex items-center gap-2">
+                      <span class="text-xs font-semibold text-white/70">${escapeHtml(formatAuthor(c.user_id))}</span>
+                      <span class="text-xs text-white/25">·</span>
+                      <span class="text-xs text-white/40">${escapeHtml(formatRelativeTime(c.created_at))}</span>
+                      ${isCommentOwn ? `<button type="button" data-comment-delete-id="${c.id}" class="ml-auto text-xs text-rose-400/60 opacity-0 transition hover:text-rose-300 group-hover/comment:opacity-100">删除</button>` : ''}
+                    </div>
+                    <p class="mt-0.5 whitespace-pre-wrap text-sm leading-6 text-white/60">${escapeHtml(c.content)}</p>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+            ` : `<div class="mt-2 pl-16"><a href="/tweet/${tweet.id}" class="text-xs text-white/30 hover:text-white/50 transition">💬 回复</a></div>`}
           </article>
         `;
       })
@@ -465,7 +558,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
     if (existingSession) {
       session = existingSession;
-      sessionLabel.textContent = `匿名用户 ${existingSession.user.id.slice(0, 8)}`;
+      updateSessionLabel();
       updateComposerState();
       return existingSession;
     }
@@ -483,42 +576,298 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     }
 
     authErrorMessage = '';
-    sessionLabel.textContent = session
-      ? `匿名用户 ${session.user.id.slice(0, 8)}`
-      : '匿名会话已创建';
+    updateSessionLabel();
     updateComposerState();
     return session;
   }
 
   async function fetchTweets({ silent = false } = {}) {
-    if (refreshInFlight) {
-      return;
-    }
-
+    if (refreshInFlight) return;
     refreshInFlight = true;
 
-    if (!silent) {
-      feedStatus.textContent = '正在同步最新推文...';
-    }
+    if (!silent) feedStatus.textContent = currentView === 'bookmarks' ? '正在加载收藏...' : currentView === 'search' ? '搜索中...' : '正在同步最新推文...';
 
     try {
-      const { data, error } = await supabase
-        .from('tweets')
-        .select('id, content, image_url, created_at, user_id')
-        .order('created_at', { ascending: false })
-        .limit(50);
-
-      if (error) {
-        throw new Error(toFriendlyErrorMessage(error));
+      let data;
+      if (currentView === 'bookmarks' && session) {
+        const { data: rpcData, error: bErr } = await supabase.rpc('get_bookmark_timeline', { uid: session.user.id, max_results: 50 });
+        if (bErr) throw new Error(toFriendlyErrorMessage(bErr));
+        data = rpcData ?? [];
+      } else if (currentView === 'search' && searchQuery) {
+        const { data: rpcData, error: sErr } = await supabase.rpc('search_timeline', { query_text: searchQuery, max_results: 20 });
+        if (sErr) throw new Error(toFriendlyErrorMessage(sErr));
+        data = rpcData ?? [];
+      } else {
+        const { data: rpcData, error: tErr } = await supabase.rpc('get_timeline', { max_results: 50 });
+        if (tErr) throw new Error(toFriendlyErrorMessage(tErr));
+        data = rpcData ?? [];
       }
 
-      renderTweets(data ?? []);
+      let likedIds = [], bookmarkedIds = [], starredIds = [];
+      if (session) {
+        const [likesRes, bookmarksRes, starsRes] = await Promise.all([
+          supabase.from('tweet_likes').select('tweet_id').eq('user_id', session.user.id),
+          supabase.from('bookmarks').select('tweet_id').eq('user_id', session.user.id),
+          supabase.from('featured_stars').select('tweet_id').eq('user_id', session.user.id),
+        ]);
+        likedIds = (likesRes.data || []).map((l) => l.tweet_id);
+        bookmarkedIds = (bookmarksRes.data || []).map((b) => b.tweet_id);
+        starredIds = (starsRes.data || []).map((s) => s.tweet_id);
+      }
+
+      renderTweets(data, likedIds, bookmarkedIds, starredIds);
       feedStatus.textContent = `已更新 ${formatRelativeTime(new Date().toISOString())}`;
     } catch (error) {
       feedStatus.textContent = error.message;
     } finally {
       refreshInFlight = false;
     }
+  }
+
+  async function toggleLike(tweetId) {
+    if (!session) return;
+    const { data: existing } = await supabase
+      .from('tweet_likes')
+      .select('tweet_id')
+      .eq('tweet_id', tweetId)
+      .eq('user_id', session.user.id)
+      .maybeSingle();
+
+    if (existing) {
+      await supabase.from('tweet_likes').delete().eq('tweet_id', tweetId).eq('user_id', session.user.id);
+    } else {
+      await supabase.from('tweet_likes').insert({ tweet_id: tweetId, user_id: session.user.id });
+    }
+
+    await fetchTweets({ silent: true });
+  }
+
+  async function toggleBookmark(tweetId) {
+    if (!session) return;
+    const { data: existing } = await supabase
+      .from('bookmarks')
+      .select('tweet_id')
+      .eq('tweet_id', tweetId)
+      .eq('user_id', session.user.id)
+      .maybeSingle();
+
+    if (existing) {
+      await supabase.from('bookmarks').delete().eq('tweet_id', tweetId).eq('user_id', session.user.id);
+    } else {
+      await supabase.from('bookmarks').insert({ tweet_id: tweetId, user_id: session.user.id });
+    }
+
+    await fetchTweets({ silent: true });
+  }
+
+  async function toggleFeaturedStar(tweetId) {
+    if (!session) return;
+    const { data: existing } = await supabase
+      .from('featured_stars')
+      .select('tweet_id')
+      .eq('tweet_id', tweetId)
+      .eq('user_id', session.user.id)
+      .maybeSingle();
+
+    if (existing) {
+      await supabase.from('featured_stars').delete().eq('tweet_id', tweetId).eq('user_id', session.user.id);
+    } else {
+      await supabase.from('featured_stars').insert({ tweet_id: tweetId, user_id: session.user.id });
+    }
+
+    await fetchTweets({ silent: true });
+  }
+
+  async function deleteComment(commentId) {
+    if (!session) return;
+    const { error } = await supabase.from('comments').delete().eq('id', commentId).eq('user_id', session.user.id);
+    if (error) { feedStatus.textContent = toFriendlyErrorMessage(error); return; }
+    await fetchTweets({ silent: true });
+  }
+
+  async function deleteTweet(tweetId) {
+    if (!session) return;
+    if (!confirm('确认删除这条推文？')) return;
+    const { error } = await supabase.from('tweets').delete().eq('id', tweetId).eq('user_id', session.user.id);
+    if (error) { feedStatus.textContent = toFriendlyErrorMessage(error); return; }
+    await fetchTweets({ silent: true });
+  }
+
+  function toggleBookmarkView() {
+    if (currentView === 'bookmarks') {
+      currentView = 'timeline';
+    } else {
+      currentView = 'bookmarks';
+    }
+    const feedTitle = document.querySelector('h1');
+    if (feedTitle) feedTitle.textContent = currentView === 'bookmarks' ? '书签' : 'Home';
+    fetchTweets();
+  }
+
+  let notifChannel = null;
+  let notifOpen = false;
+
+  function getNotifMessage(n) {
+    const src = n.source_user_id ? `@${n.source_user_id.slice(0, 8)}` : '某人';
+    switch (n.type) {
+      case 'comment': return `${src} 评论了你的推文`;
+      case 'like':    return `${src} 赞了你的推文`;
+      case 'star':    return `${src} 标记了你的推文为精华`;
+      default:        return `${src} 与你互动了`;
+    }
+  }
+
+  function renderNotifications(list) {
+    if (!list.length) {
+      notifList.innerHTML = '<p class="py-4 text-center text-xs text-white/40">暂无通知。</p>';
+      return;
+    }
+    notifList.innerHTML = list.map(n => `
+      <div class="rounded-2xl border border-white/10 bg-white/[0.03] px-3 py-2.5 text-sm ${n.read ? 'opacity-50' : ''}">
+        <div class="flex items-center gap-2">
+          <span class="text-xs">${n.type === 'comment' ? '💬' : n.type === 'like' ? '❤️' : '⭐'}</span>
+          <a href="/tweet/${n.tweet_id}" class="flex-1 text-white/80 transition hover:text-cyan-300">${escapeHtml(getNotifMessage(n))}</a>
+          <span class="text-[10px] text-white/30">${escapeHtml(formatRelativeTime(n.created_at))}</span>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  async function loadNotifications() {
+    if (!session) { notifList.innerHTML = '<p class="py-4 text-center text-xs text-white/40">登录后查看通知。</p>'; return; }
+    const { data } = await supabase.from('notifications').select('*').eq('target_user_id', session.user.id).order('created_at', { ascending: false }).limit(20);
+    renderNotifications(data ?? []);
+  }
+
+  async function updateNotifBadge() {
+    if (!session) { notifBadge.classList.add('hidden'); return; }
+    const { count } = await supabase.from('notifications').select('*', { count: 'exact', head: true }).eq('target_user_id', session.user.id).eq('read', false);
+    if (count > 0) {
+      notifBadge.classList.remove('hidden');
+      notifBadge.textContent = count > 99 ? '99+' : String(count);
+    } else {
+      notifBadge.classList.add('hidden');
+    }
+  }
+
+  async function markAllNotifRead() {
+    if (!session) return;
+    await supabase.from('notifications').update({ read: true }).eq('target_user_id', session.user.id).eq('read', false);
+    notifBadge.classList.add('hidden');
+    if (notifOpen) loadNotifications();
+  }
+
+  function mountNotifRealtime() {
+    notifChannel?.unsubscribe();
+    if (!session) return;
+    notifChannel = supabase
+      .channel('notif-channel')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: `target_user_id=eq.${session.user.id}` }, () => {
+        updateNotifBadge();
+        if (notifOpen) loadNotifications();
+      })
+      .subscribe();
+  }
+
+  let searchQuery = '';
+  let searchTimer = null;
+
+  async function handleSearchInput() {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+      const q = document.querySelector('#search-input').value.trim();
+      if (!q) {
+        if (currentView === 'search') {
+          currentView = 'timeline';
+          document.querySelector('h1').textContent = 'Home';
+          fetchTweets();
+        }
+        return;
+      }
+      searchQuery = q;
+      currentView = 'search';
+      document.querySelector('h1').textContent = `搜索: ${q}`;
+      fetchTweets();
+    }, 400);
+  }
+
+  async function loadFeaturedTweets() {
+    const { data, error } = await supabase
+      .from('tweets')
+      .select('id, content, created_at')
+      .eq('is_featured', true)
+      .order('created_at', { ascending: false })
+      .limit(5);
+
+    if (error || !data?.length) {
+      featuredList.innerHTML = '<p class="text-xs text-white/40">暂无精华帖。</p>';
+      return;
+    }
+
+    featuredList.innerHTML = data
+      .map(
+        (t) =>
+          `<a href="/tweet/${t.id}" class="block rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm transition hover:bg-white/[0.06]">${
+            t.content
+              ? `<p class="line-clamp-2 leading-6 text-white/70">${escapeHtml(t.content)}</p>`
+              : '<p class="text-xs text-white/40 italic">[图片推文]</p>'
+          }<p class="mt-1 text-[11px] text-white/30">${formatRelativeTime(t.created_at)}</p></a>`
+      )
+      .join('');
+  }
+
+  async function loadStats() {
+    try {
+      const { data: viewsData } = await supabase.rpc('increment_visit_count');
+      if (viewsData != null) {
+        statsPageViews.textContent = Number(viewsData).toLocaleString();
+      }
+    } catch { statsPageViews.textContent = '--'; }
+
+    try {
+      const { data: topUsers } = await supabase.rpc('get_top_posters', { limit_count: 3 });
+      if (topUsers?.length) {
+        statsTopContributors.innerHTML = topUsers
+          .map(
+            (u, i) =>
+              `<div class="flex items-center justify-between text-xs">
+                <span class="text-white/60">${i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉'} @${u.user_id.slice(0, 8)}</span>
+                <span class="text-white/40">${u.post_count} 条</span>
+              </div>`
+          )
+          .join('');
+      } else {
+        statsTopContributors.innerHTML = '<p class="text-xs text-white/40">暂无数据。</p>';
+      }
+    } catch { statsTopContributors.innerHTML = '<p class="text-xs text-white/40">暂无数据。</p>'; }
+  }
+
+  // 个人资料
+  const profileModal = document.querySelector('#profile-modal');
+  const profileNickname = document.querySelector('#profile-nickname-input');
+  const profileBio = document.querySelector('#profile-bio-input');
+  const profileStatus = document.querySelector('#profile-status');
+
+  async function loadProfile() {
+    if (!session) return;
+    const { data } = await supabase.from('profiles').select('nickname, bio').eq('id', session.user.id).single();
+    if (data) {
+      profileNickname.value = data.nickname || '';
+      profileBio.value = data.bio || '';
+    }
+  }
+
+  async function saveProfile() {
+    if (!session) return;
+    profileStatus.textContent = '保存中...';
+    const { error } = await supabase.from('profiles').upsert({
+      id: session.user.id,
+      nickname: profileNickname.value.trim(),
+      bio: profileBio.value.trim(),
+    });
+    if (error) { profileStatus.textContent = error.message; return; }
+    profileStatus.textContent = '已保存 ✓';
+    setTimeout(() => profileModal.classList.add('hidden'), 1200);
   }
 
   async function submitTweet(event) {
@@ -602,14 +951,40 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       const redirectTo = new URL(window.location.href);
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'github',
-        options: {
-          redirectTo: redirectTo.toString(),
-        },
+        options: { redirectTo: redirectTo.toString() },
       });
 
-      if (error) {
-        throw error;
-      }
+      if (error) { throw error; }
+    } catch (error) {
+      authErrorMessage = toFriendlyErrorMessage(error);
+      updateComposerState();
+    }
+  }
+
+  async function signInWithGoogle() {
+    try {
+      const redirectTo = new URL(window.location.href);
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: redirectTo.toString() },
+      });
+
+      if (error) { throw error; }
+    } catch (error) {
+      authErrorMessage = toFriendlyErrorMessage(error);
+      updateComposerState();
+    }
+  }
+
+  async function signInWithQQ() {
+    try {
+      const redirectTo = new URL(window.location.href);
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'qq',
+        options: { redirectTo: redirectTo.toString() },
+      });
+
+      if (error) { throw error; }
     } catch (error) {
       authErrorMessage = toFriendlyErrorMessage(error);
       updateComposerState();
@@ -652,21 +1027,60 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     updateComposerState();
   });
   removeImageButton.addEventListener('click', () => clearImageSelection());
+  googleLoginButton.addEventListener('click', signInWithGoogle);
   anonLoginButton.addEventListener('click', signInAnonymously);
-  githubLoginButton.addEventListener('click', signInWithGitHub);
 
   supabase.auth.onAuthStateChange((_event, nextSession) => {
     session = nextSession;
     authErrorMessage = '';
-    sessionLabel.textContent = nextSession
-      ? `匿名用户 ${nextSession.user.id.slice(0, 8)}`
-      : '未建立会话';
+    updateSessionLabel();
     updateComposerState();
   });
 
+  // 事件委托：点赞 / 精华星 / 书签 / 删除
+  feedList.addEventListener('click', (e) => {
+    const likeBtn = e.target.closest('[data-like-id]');
+    const starBtn = e.target.closest('[data-star-id]');
+    const bookmarkBtn = e.target.closest('[data-bookmark-id]');
+    const deleteBtn = e.target.closest('[data-delete-id]');
+    const commentDeleteBtn = e.target.closest('[data-comment-delete-id]');
+    if (likeBtn) { e.preventDefault(); toggleLike(likeBtn.dataset.likeId); }
+    if (starBtn) { e.preventDefault(); toggleFeaturedStar(starBtn.dataset.starId); }
+    if (bookmarkBtn) { e.preventDefault(); toggleBookmark(bookmarkBtn.dataset.bookmarkId); }
+    if (deleteBtn) { e.preventDefault(); deleteTweet(deleteBtn.dataset.deleteId); }
+    if (commentDeleteBtn) { e.preventDefault(); deleteComment(commentDeleteBtn.dataset.commentDeleteId); }
+  });
+
+  // 搜索事件
+  const searchInput = document.querySelector('#search-input');
+  if (searchInput) searchInput.addEventListener('input', handleSearchInput);
+
+  // 书签导航
+  document.querySelectorAll('nav a').forEach((a) => {
+    if (a.textContent.trim() === '书签') {
+      a.addEventListener('click', (e) => { e.preventDefault(); toggleBookmarkView(); });
+    }
+  });
+
+  // 通知面板
+  notifNav.addEventListener('click', (e) => {
+    e.preventDefault();
+    notifOpen = !notifOpen;
+    notifPanel.classList.toggle('hidden', !notifOpen);
+    if (notifOpen) loadNotifications();
+  });
+  notifMarkRead.addEventListener('click', markAllNotifRead);
+
+  // 资料弹窗
+  const editProfileBtn = document.querySelector('#edit-profile-button');
+  const profileModalClose = document.querySelector('#profile-modal-close');
+  const profileSaveBtn = document.querySelector('#profile-save-btn');
+  editProfileBtn.addEventListener('click', () => { loadProfile(); profileModal.classList.remove('hidden'); });
+  profileModalClose.addEventListener('click', () => profileModal.classList.add('hidden'));
+  profileModal.addEventListener('click', (e) => { if (e.target === profileModal) profileModal.classList.add('hidden'); });
+  profileSaveBtn.addEventListener('click', saveProfile);
+
   updateComposerState();
-  mountRealtime();
-  await fetchTweets();
 
   try {
     await ensureSession();
@@ -675,5 +1089,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     sessionLabel.textContent = '未建立会话';
     updateComposerState();
   }
+
+  mountRealtime();
+  mountNotifRealtime();
+  await fetchTweets();
+  loadFeaturedTweets();
+  loadStats();
+  updateNotifBadge();
 </script>
 </BaseLayout>
