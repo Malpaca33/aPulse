@@ -1,0 +1,428 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="aPulse | 照片墙" description="aPulse | 按地点和主题浏览照片">
+  <section class="min-h-screen bg-black text-white">
+    <div class="mx-auto w-full max-w-[90rem] px-4 py-8 sm:px-6">
+      <!-- 头部 -->
+      <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <a href="/" class="inline-flex items-center gap-2 text-sm text-cyan-400 transition hover:text-cyan-300">&larr; 返回主页</a>
+          <h1 class="mt-2 text-3xl font-black tracking-tight text-white" transition:name="page-title">照片墙</h1>
+          <p class="mt-1 text-sm text-white/55">按主题和城市浏览你的影像记录</p>
+        </div>
+        <div class="flex gap-2" id="view-tabs">
+          <button type="button" class="view-tab rounded-full px-4 py-2 text-sm font-semibold transition" data-view="topic">按主题</button>
+          <button type="button" class="view-tab rounded-full px-4 py-2 text-sm font-semibold transition" data-view="city">按城市</button>
+          <button type="button" class="view-tab rounded-full px-4 py-2 text-sm font-semibold transition" data-view="map">地图</button>
+        </div>
+      </div>
+
+      <!-- 加载状态 -->
+      <p id="photos-status" class="text-center text-sm text-white/40">加载中...</p>
+
+      <!-- 内容容器 -->
+      <div id="photos-content" class="hidden"></div>
+    </div>
+  </section>
+
+  <!-- 编辑照片属性弹窗 -->
+  <div id="photo-edit-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/70 backdrop-blur-sm">
+    <div class="max-h-[80vh] w-full max-w-sm overflow-y-auto rounded-3xl border border-white/10 bg-zinc-900 p-5 shadow-2xl">
+      <div class="mb-4 flex items-center justify-between">
+        <h3 class="text-sm font-bold text-white">编辑照片信息</h3>
+        <button id="photo-edit-close" type="button" class="inline-flex h-7 w-7 items-center justify-center rounded-full text-white/50 transition hover:bg-white/[0.06] hover:text-white">
+          <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+      <div class="space-y-4">
+        <div>
+          <p class="text-[11px] font-semibold uppercase tracking-wider text-white/30 mb-2">城市</p>
+          <button id="edit-city-btn" type="button" class="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs text-white/60 transition hover:border-cyan-400/30 hover:text-cyan-300">
+            📍 <span id="edit-city-display">未选择</span>
+          </button>
+          <div id="edit-province-grid" class="mt-3 hidden grid grid-cols-4 gap-2"></div>
+          <div id="edit-city-grid" class="mt-3 hidden">
+            <p class="mb-2 text-[11px] font-semibold uppercase tracking-wider text-white/30">选择城市</p>
+            <div class="flex flex-wrap gap-2" id="edit-city-list"></div>
+          </div>
+        </div>
+        <div>
+          <p class="text-[11px] font-semibold uppercase tracking-wider text-white/30 mb-2">风格</p>
+          <div class="flex flex-wrap gap-1.5" id="edit-topic-buttons">
+            <button type="button" class="edit-topic-btn rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs text-white/60 transition hover:border-cyan-400/30 hover:text-white" data-topic="街拍">街拍</button>
+            <button type="button" class="edit-topic-btn rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs text-white/60 transition hover:border-cyan-400/30 hover:text-white" data-topic="风光">风光</button>
+            <button type="button" class="edit-topic-btn rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs text-white/60 transition hover:border-cyan-400/30 hover:text-white" data-topic="人像">人像</button>
+            <button type="button" class="edit-topic-btn rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs text-white/60 transition hover:border-cyan-400/30 hover:text-white" data-topic="meme">meme</button>
+          </div>
+        </div>
+        <button id="edit-save-btn" type="button" class="w-full rounded-full bg-cyan-500 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400">保存</button>
+        <p id="edit-status" class="text-center text-xs text-white/40"></p>
+      </div>
+    </div>
+  </div>
+
+  <style is:global>
+    @import 'leaflet/dist/leaflet.css';
+    #city-map { height: 100%; width: 100%; border-radius: 1rem; }
+    .leaflet-container { background: #09090b !important; }
+    .leaflet-popup-content-wrapper { background: #18181b !important; color: #fff !important; border-radius: 12px !important; box-shadow: 0 8px 32px rgba(0,0,0,0.5) !important; }
+    .leaflet-popup-tip { background: #18181b !important; }
+    .leaflet-popup-close-button { color: #fff !important; right: 8px !important; top: 8px !important; }
+    .leaflet-popup-content { margin: 12px 16px !important; }
+  </style>
+
+  <script>
+  import L from 'leaflet';
+  import { createBrowserSupabase } from '../lib/supabase.js';
+
+  const supabase = createBrowserSupabase();
+  const photosContent = document.querySelector('#photos-content');
+  const photosStatus = document.querySelector('#photos-status');
+  const viewTabs = document.querySelectorAll('.view-tab');
+  let currentTab = 'topic';
+  let photoData = [];
+  let editTargetId = null;
+  let editSelectedCity = '';
+  let editSelectedTopic = '';
+
+  const PROVINCES = { '北京': ['北京'], '天津': ['天津'], '上海': ['上海'], '重庆': ['重庆'], '江苏': ['南京', '苏州', '无锡', '常州', '南通', '扬州', '镇江', '徐州', '盐城', '淮安', '连云港', '泰州', '宿迁'], '浙江': ['杭州', '宁波', '温州', '嘉兴', '湖州', '绍兴', '金华', '台州', '舟山', '衢州', '丽水'], '广东': ['广州', '深圳', '珠海', '东莞', '佛山', '中山', '惠州', '汕头', '湛江', '肇庆', '江门', '茂名'], '四川': ['成都', '绵阳', '德阳', '宜宾', '南充', '泸州', '乐山', '自贡', '达州', '凉山'], '湖北': ['武汉', '宜昌', '襄阳', '荆州', '黄石', '十堰', '孝感', '荆门'], '湖南': ['长沙', '株洲', '湘潭', '衡阳', '岳阳', '常德', '郴州', '怀化'], '福建': ['厦门', '福州', '泉州', '漳州', '莆田', '龙岩', '三明', '南平'], '山东': ['青岛', '济南', '烟台', '威海', '潍坊', '临沂', '淄博', '济宁', '泰安', '日照'], '陕西': ['西安', '咸阳', '宝鸡', '延安', '汉中', '渭南'], '云南': ['昆明', '大理', '丽江', '香格里拉', '西双版纳', '红河'], '海南': ['三亚', '海口', '万宁', '陵水'], '辽宁': ['大连', '沈阳', '鞍山', '锦州', '丹东'], '黑龙江': ['哈尔滨', '大庆', '齐齐哈尔', '牡丹江', '佳木斯'], '新疆': ['乌鲁木齐', '伊犁', '喀什', '吐鲁番'], '西藏': ['拉萨', '日喀则', '林芝'], '香港': ['香港'], '澳门': ['澳门'], '台湾': ['台北', '高雄', '台中', '台南'] };
+  const PROVINCE_NAMES = Object.keys(PROVINCES);
+
+  const CITY_COORDS = { '北京': [39.9042,116.4074], '天津': [39.1252,117.1908], '上海': [31.2304,121.4737], '重庆': [29.4316,106.9123], '南京': [32.0603,118.7969], '苏州': [31.299,120.5853], '无锡': [31.491,120.3119], '常州': [31.7714,119.974], '南通': [32.0015,120.8642], '扬州': [32.3943,119.4133], '镇江': [32.1912,119.4258], '徐州': [34.2714,117.1862], '盐城': [33.3795,120.1608], '淮安': [33.5151,119.015], '连云港': [34.639,119.2214], '泰州': [32.4605,119.9244], '宿迁': [33.9787,118.2856], '杭州': [30.2741,120.1551], '宁波': [29.8683,121.544], '温州': [27.9939,120.7015], '嘉兴': [30.771,120.7551], '湖州': [30.8939,120.0878], '绍兴': [30.0015,120.58], '金华': [29.1051,119.6476], '台州': [28.6564,121.4208], '舟山': [29.9854,122.206], '衢州': [28.9359,118.875], '丽水': [28.4672,119.923], '广州': [23.1291,113.2644], '深圳': [22.5431,114.0579], '珠海': [22.271,113.5776], '东莞': [23.0208,113.7518], '佛山': [23.0219,113.1214], '中山': [22.5167,113.3783], '惠州': [23.1117,114.4167], '汕头': [23.3539,116.6995], '湛江': [21.2702,110.3599], '肇庆': [23.076,112.4627], '江门': [22.579,113.081], '茂名': [21.663,110.9312], '成都': [30.5728,104.0668], '绵阳': [31.4673,104.7305], '德阳': [31.1275,104.3979], '宜宾': [28.7694,104.6412], '南充': [30.78,106.11], '泸州': [28.871,105.442], '乐山': [29.55,103.75], '自贡': [29.34,104.77], '达州': [31.2,107.5], '凉山': [27.9,102.27], '武汉': [30.5928,114.3055], '宜昌': [30.6919,111.2871], '襄阳': [32.013,112.134], '荆州': [30.335,112.24], '黄石': [30.21,115.07], '十堰': [32.63,110.79], '孝感': [30.92,113.91], '荆门': [31.08,112.19], '长沙': [28.2282,112.9388], '株洲': [27.83,113.15], '湘潭': [27.87,112.95], '衡阳': [26.89,112.59], '岳阳': [29.37,113.12], '常德': [29.04,111.7], '郴州': [25.79,113.02], '怀化': [27.57,110.0], '厦门': [24.4798,118.0894], '福州': [26.0745,119.2965], '泉州': [24.8739,118.6003], '漳州': [24.5133,117.6471], '莆田': [25.454,119.008], '龙岩': [25.18,117.05], '三明': [26.24,117.63], '南平': [26.64,118.17], '青岛': [36.0671,120.3826], '济南': [36.6512,117.1201], '烟台': [37.4667,121.45], '威海': [37.5,122.12], '潍坊': [36.706,119.162], '临沂': [35.07,118.34], '淄博': [36.813,118.055], '济宁': [35.42,116.59], '泰安': [36.19,117.1], '日照': [35.42,119.53], '西安': [34.2611,108.942], '咸阳': [34.35,108.7], '宝鸡': [34.36,107.14], '延安': [36.59,109.48], '汉中': [33.08,107.02], '渭南': [34.51,109.5], '昆明': [25.0389,102.7183], '大理': [25.58,100.23], '丽江': [26.87,100.23], '香格里拉': [27.83,99.7], '西双版纳': [21.95,100.77], '红河': [23.37,103.15], '三亚': [18.2528,109.512], '海口': [20.044,110.349], '万宁': [18.795,110.39], '陵水': [18.51,110.03], '大连': [38.914,121.6147], '沈阳': [41.8057,123.4315], '鞍山': [41.11,122.97], '锦州': [41.11,121.14], '丹东': [40.13,124.38], '哈尔滨': [45.8038,126.535], '大庆': [46.59,125.1], '齐齐哈尔': [47.35,123.97], '牡丹江': [44.58,129.58], '佳木斯': [46.81,130.32], '乌鲁木齐': [43.8256,87.6168], '伊犁': [43.92,81.32], '喀什': [39.47,75.99], '吐鲁番': [42.95,89.19], '拉萨': [29.65,91.14], '日喀则': [29.27,88.88], '林芝': [29.68,94.36], '香港': [22.3193,114.1694], '澳门': [22.1987,113.5439], '台北': [25.033,121.5654], '高雄': [22.6273,120.3014], '台中': [24.1477,120.6736], '台南': [22.9938,120.204] };
+
+  function escapeHtml(value) {
+    return String(value)
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#39;');
+  }
+
+  // 按主题风格分组
+  function renderByTopic(photos) {
+    const groups = {};
+    for (const p of photos) {
+      const topic = p.topic || '未分类';
+      if (!groups[topic]) groups[topic] = [];
+      groups[topic].push(p);
+    }
+
+    const topics = Object.keys(groups).sort((a, b) => {
+      if (a === '未分类') return 1;
+      if (b === '未分类') return -1;
+      return groups[b].length - groups[a].length;
+    });
+
+    if (!topics.length) return '<p class="text-center text-white/40 py-12">还没有带照片的推文。</p>';
+
+    return topics.map(topic => `
+      <section class="mb-10">
+        <div class="mb-4 flex items-center gap-3">
+          <span class="rounded-full bg-cyan-400/10 px-3 py-1 text-sm font-semibold text-cyan-300">${escapeHtml(topic)}</span>
+          <span class="text-xs text-white/35">${groups[topic].length} 张</span>
+        </div>
+        <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+          ${groups[topic].map(p => `
+            <a href="/tweet/${p.id}" class="group relative aspect-square overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] transition hover:border-cyan-400/40">
+              <img src="${escapeHtml(p.image_url)}" alt="" loading="lazy" class="h-full w-full object-cover transition group-hover:scale-105" />
+              <button type="button" class="edit-photo-btn absolute right-2 top-2 z-10 inline-flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-white/70 opacity-0 backdrop-blur-sm transition hover:bg-cyan-500 hover:text-white group-hover:opacity-100" data-photo-id="${p.id}" data-photo-city="${p.city || ''}" data-photo-topic="${p.topic || ''}" title="编辑照片信息"><svg viewBox="0 0 24 24" class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></button>
+              <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-3 opacity-0 transition group-hover:opacity-100">
+                <p class="text-xs text-white/90 truncate">${p.city ? `📍 ${escapeHtml(p.city)}` : ''}</p>
+                <p class="text-[10px] text-white/50">${new Date(p.created_at).toLocaleDateString('zh-CN')}</p>
+              </div>
+            </a>
+          `).join('')}
+        </div>
+      </section>
+    `).join('');
+  }
+
+  // 按城市分组
+  function renderByCity(photos) {
+    const noCity = [];
+    const cities = {};
+    for (const p of photos) {
+      if (!p.city) { noCity.push(p); continue; }
+      if (!cities[p.city]) cities[p.city] = [];
+      cities[p.city].push(p);
+    }
+
+    const cityNames = Object.keys(cities).sort((a, b) => cities[b].length - cities[a].length);
+
+    if (!cityNames.length && !noCity.length) return '<p class="text-center text-white/40 py-12">还没有带照片的推文。</p>';
+
+    let html = '';
+    for (const city of cityNames) {
+      const photos_list = cities[city];
+      html += `
+        <section class="mb-10">
+          <div class="mb-4 flex items-center gap-3">
+            <span class="rounded-full bg-amber-400/10 px-3 py-1 text-sm font-semibold text-amber-300">📍 ${escapeHtml(city)}</span>
+            <span class="text-xs text-white/35">${photos_list.length} 张</span>
+          </div>
+          <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+            ${photos_list.map(p => `
+              <a href="/tweet/${p.id}" class="group relative aspect-square overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] transition hover:border-amber-400/40">
+                <img src="${escapeHtml(p.image_url)}" alt="" loading="lazy" class="h-full w-full object-cover transition group-hover:scale-105" />
+              <button type="button" class="edit-photo-btn absolute right-2 top-2 z-10 inline-flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-white/70 opacity-0 backdrop-blur-sm transition hover:bg-cyan-500 hover:text-white group-hover:opacity-100" data-photo-id="${p.id}" data-photo-city="${p.city || ''}" data-photo-topic="${p.topic || ''}" title="编辑照片信息"><svg viewBox="0 0 24 24" class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></button>
+                <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-3 opacity-0 transition group-hover:opacity-100">
+                  <p class="text-xs text-white/90 truncate">${p.topic ? `🏷 ${escapeHtml(p.topic)}` : ''}</p>
+                  <p class="text-[10px] text-white/50">${new Date(p.created_at).toLocaleDateString('zh-CN')}</p>
+                </div>
+              </a>
+            `).join('')}
+          </div>
+        </section>
+      `;
+    }
+
+    if (noCity.length) {
+      html += `
+        <section class="mb-10">
+          <div class="mb-4 flex items-center gap-3">
+            <span class="rounded-full bg-white/10 px-3 py-1 text-sm font-semibold text-white/50">未标注城市</span>
+            <span class="text-xs text-white/35">${noCity.length} 张</span>
+          </div>
+          <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+            ${noCity.map(p => `
+              <a href="/tweet/${p.id}" class="group relative aspect-square overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] transition hover:border-white/20">
+                <img src="${escapeHtml(p.image_url)}" alt="" loading="lazy" class="h-full w-full object-cover transition group-hover:scale-105" />
+              <button type="button" class="edit-photo-btn absolute right-2 top-2 z-10 inline-flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-white/70 opacity-0 backdrop-blur-sm transition hover:bg-cyan-500 hover:text-white group-hover:opacity-100" data-photo-id="${p.id}" data-photo-city="${p.city || ''}" data-photo-topic="${p.topic || ''}" title="编辑照片信息"><svg viewBox="0 0 24 24" class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></button>
+              </a>
+            `).join('')}
+          </div>
+        </section>
+      `;
+    }
+
+    return html;
+  }
+
+  // 地图视图
+  function renderMap(photos) {
+    const cityData = {};
+    for (const p of photos) {
+      if (!p.city) continue;
+      if (!cityData[p.city]) cityData[p.city] = { count: 0, photos: [] };
+      cityData[p.city].count++;
+      cityData[p.city].photos.push(p);
+    }
+
+    const cities = Object.keys(cityData).sort();
+    if (!cities.length) return '<p class="text-center text-white/40 py-12">还没有标注城市的照片。</p>';
+
+    return `
+      <div id="map-container" class="h-[65vh] min-h-[400px] max-h-[700px] rounded-2xl border border-white/10 bg-zinc-950 overflow-hidden">
+        <div id="city-map" class="h-full w-full"></div>
+      </div>
+    `;
+  }
+
+  function renderView() {
+    if (!photoData.length) {
+      photosContent.innerHTML = '<div class="py-20 text-center"><p class="text-4xl mb-4">📷</p><p class="text-white/40">还没有带照片的推文。发帖时带上图片、城市和主题标签吧。</p></div>';
+      photosContent.classList.remove('hidden');
+      return;
+    }
+
+    let html;
+    if (currentTab === 'topic') html = renderByTopic(photoData);
+    else if (currentTab === 'city') html = renderByCity(photoData);
+    else html = renderMap(photoData);
+
+    photosContent.innerHTML = html;
+    photosContent.classList.remove('hidden');
+
+    // 渲染地图
+    if (currentTab === 'map') initCityMap();
+  }
+
+  function initCityMap() {
+    const mapEl = document.getElementById('city-map');
+    if (!mapEl || mapEl.dataset.initialized) return;
+
+    const counts = {};
+    const cityPhotos = {};
+    for (const p of photoData) {
+      if (!p.city || !CITY_COORDS[p.city]) continue;
+      counts[p.city] = (counts[p.city] || 0) + 1;
+      if (!cityPhotos[p.city]) cityPhotos[p.city] = [];
+      if (cityPhotos[p.city].length < 6) cityPhotos[p.city].push(p.image_url);
+    }
+
+    const cities = Object.keys(counts);
+    if (!cities.length) {
+      mapEl.innerHTML = '<div class="flex h-full items-center justify-center"><p class="text-white/40 text-sm">还没有标注坐标城市的照片。</p></div>';
+      return;
+    }
+
+    mapEl.dataset.initialized = '1';
+    mapEl.innerHTML = '';
+
+    const map = L.map(mapEl, { zoomControl: false, attributionControl: false }).setView([35.86, 104.19], 4);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
+
+    const bounds = [];
+    for (const city of cities) {
+      const coord = CITY_COORDS[city];
+      bounds.push(coord);
+      const count = counts[city];
+      const radius = Math.min(8 + count * 2, 24);
+
+      const marker = L.circleMarker(coord, {
+        radius, color: '#22d3ee', fillColor: '#22d3ee', fillOpacity: 0.2, weight: 2,
+      }).addTo(map);
+
+      marker.bindTooltip(city, { direction: 'top', offset: [0, -radius], className: 'text-xs font-semibold text-white' });
+      marker.bindPopup(`
+        <div class="text-center" style="font-family:system-ui,sans-serif">
+          <p style="font-weight:700;margin:0 0 4px;color:#fff">📍 ${escapeHtml(city)}</p>
+          <p style="font-size:12px;color:#a1a1aa;margin:0 0 8px">${count} 张照片</p>
+          <div style="display:flex;gap:4px;justify-content:center">${cityPhotos[city].map(url => `<img src="${escapeHtml(url)}" class="h-12 w-12 rounded-lg object-cover" />`).join('')}</div>
+        </div>
+      `).openPopup();
+    }
+
+    if (bounds.length > 1) map.fitBounds(bounds, { padding: [50, 50] });
+    else map.setView(bounds[0], 10);
+  }
+
+  async function loadPhotos() {
+    photosStatus.textContent = '加载中...';
+    const { data, error } = await supabase
+      .from('tweets')
+      .select('id, image_url, city, topic, created_at, content')
+      .not('image_url', 'is', null)
+      .order('created_at', { ascending: false })
+      .limit(100);
+
+    photosStatus.classList.add('hidden');
+    if (error) {
+      photosContent.innerHTML = `<p class="text-center text-rose-400 py-12">加载失败: ${escapeHtml(error.message)}</p>`;
+      photosContent.classList.remove('hidden');
+      return;
+    }
+    photoData = data || [];
+    renderView();
+  }
+
+  // Tab 切换
+  viewTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      viewTabs.forEach(t => {
+        t.classList.remove('bg-cyan-500', 'text-black', 'font-bold');
+        t.classList.add('text-white/60', 'bg-white/[0.05]');
+      });
+      tab.classList.add('bg-cyan-500', 'text-black', 'font-bold');
+      tab.classList.remove('text-white/60', 'bg-white/[0.05]');
+      currentTab = tab.dataset.view;
+      renderView();
+    });
+  });
+
+  // 默认选中按主题
+  document.querySelector('.view-tab[data-view="topic"]').classList.add('bg-cyan-500', 'text-black', 'font-bold');
+  document.querySelector('.view-tab[data-view="topic"]').classList.remove('text-white/60', 'bg-white/[0.05]');
+
+  loadPhotos();
+
+  // --- Edit modal province/city picker ---
+  function openEditModal(id, city, topic) {
+    editTargetId = id;
+    editSelectedCity = city || '';
+    editSelectedTopic = topic || '';
+    document.querySelector('#edit-city-display').textContent = city || '未选择';
+    document.querySelector('#edit-province-grid').classList.add('hidden');
+    document.querySelector('#edit-city-grid').classList.add('hidden');
+    // Populate province grid
+    const grid = document.querySelector('#edit-province-grid');
+    grid.innerHTML = PROVINCE_NAMES.map(pr => '<button type="button" class="edit-province-btn rounded-xl border border-white/10 bg-white/[0.03] px-2 py-2.5 text-xs font-semibold text-white/70 transition hover:border-cyan-400/30 hover:bg-cyan-400/10 hover:text-cyan-200" data-province="' + pr + '">' + pr + '</button>').join('');
+    // Highlight selected topic
+    document.querySelectorAll('.edit-topic-btn').forEach(b => {
+      b.classList.remove('bg-cyan-400/20', 'text-cyan-200', 'border-cyan-400/30');
+      if (b.dataset.topic === topic) b.classList.add('bg-cyan-400/20', 'text-cyan-200', 'border-cyan-400/30');
+    });
+    document.querySelector('#edit-status').textContent = '';
+    document.querySelector('#photo-edit-modal').classList.remove('hidden');
+  }
+
+  document.querySelector('#edit-city-btn').addEventListener('click', () => {
+    const grid = document.querySelector('#edit-province-grid');
+    grid.classList.toggle('hidden');
+    document.querySelector('#edit-city-grid').classList.add('hidden');
+  });
+
+  document.querySelector('#edit-province-grid').addEventListener('click', (e) => {
+    const btn = e.target.closest('.edit-province-btn');
+    if (!btn) return;
+    const province = btn.dataset.province;
+    const cities = PROVINCES[province];
+    document.querySelectorAll('.edit-province-btn').forEach(b => {
+      b.classList.remove('border-cyan-400/40', 'bg-cyan-400/15', 'text-cyan-200');
+    });
+    btn.classList.add('border-cyan-400/40', 'bg-cyan-400/15', 'text-cyan-200');
+    const cityList = document.querySelector('#edit-city-list');
+    cityList.innerHTML = cities.map(c => '<button type="button" class="edit-city-option rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs text-white/70 transition hover:border-amber-400/30 hover:bg-amber-400/10 hover:text-amber-200" data-city="' + c + '">' + c + '</button>').join('');
+    document.querySelector('#edit-city-grid').classList.remove('hidden');
+  });
+
+  document.querySelector('#edit-city-list').addEventListener('click', (e) => {
+    const btn = e.target.closest('.edit-city-option');
+    if (!btn) return;
+    editSelectedCity = btn.dataset.city;
+    document.querySelector('#edit-city-display').textContent = editSelectedCity;
+    document.querySelector('#edit-province-grid').classList.add('hidden');
+    document.querySelector('#edit-city-grid').classList.add('hidden');
+  });
+
+  // Edit topic selection
+  document.querySelector('#edit-topic-buttons').addEventListener('click', (e) => {
+    const btn = e.target.closest('.edit-topic-btn');
+    if (!btn) return;
+    document.querySelectorAll('.edit-topic-btn').forEach(b => {
+      b.classList.remove('bg-cyan-400/20', 'text-cyan-200', 'border-cyan-400/30');
+    });
+    btn.classList.add('bg-cyan-400/20', 'text-cyan-200', 'border-cyan-400/30');
+    editSelectedTopic = btn.dataset.topic;
+  });
+
+  // Save edit
+  document.querySelector('#edit-save-btn').addEventListener('click', async () => {
+    if (!editTargetId) return;
+    const statusEl = document.querySelector('#edit-status');
+    statusEl.textContent = '保存中...';
+    const { error } = await supabase
+      .from('tweets')
+      .update({ city: editSelectedCity || null, topic: editSelectedTopic || null })
+      .eq('id', editTargetId);
+    if (error) { statusEl.textContent = error.message; return; }
+    statusEl.textContent = '已保存 ✓';
+    const target = photoData.find(p => p.id === editTargetId);
+    if (target) { target.city = editSelectedCity || null; target.topic = editSelectedTopic || null; }
+    renderView();
+    setTimeout(() => document.querySelector('#photo-edit-modal').classList.add('hidden'), 800);
+  });
+
+  // Open edit modal via delegation on photos-content
+  document.querySelector('#photos-content').addEventListener('click', (e) => {
+    const btn = e.target.closest('.edit-photo-btn');
+    if (!btn) return;
+    e.preventDefault();
+    e.stopPropagation();
+    openEditModal(btn.dataset.photoId, btn.dataset.photoCity, btn.dataset.photoTopic);
+  });
+
+  // Close edit modal
+  document.querySelector('#photo-edit-close').addEventListener('click', () => {
+    document.querySelector('#photo-edit-modal').classList.add('hidden');
+  });
+  document.querySelector('#photo-edit-modal').addEventListener('click', (e) => {
+    if (e.target === document.querySelector('#photo-edit-modal')) {
+      document.querySelector('#photo-edit-modal').classList.add('hidden');
+    }
+  });
+  </script>
+</BaseLayout>

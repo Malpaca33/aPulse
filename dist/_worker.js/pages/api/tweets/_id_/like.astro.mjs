@@ -70,7 +70,7 @@ async function POST({ params, request }) {
 async function createTweetSnapshot(supabase, tweetId) {
   return supabase
     .from('tweets')
-    .select('id, content, created_at, user_id, likes_count')
+    .select('id, content, image_url, created_at, user_id, likes_count')
     .eq('id', tweetId)
     .single();
 }

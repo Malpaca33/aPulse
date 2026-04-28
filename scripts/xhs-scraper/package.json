@@ -1,0 +1,13 @@
+{
+  "name": "xhs-scraper",
+  "version": "1.0.0",
+  "description": "小红书博主笔记抓取 + 摘要导出到 Obsidian",
+  "type": "module",
+  "scripts": {
+    "start": "node index.mjs",
+    "login": "node index.mjs --login"
+  },
+  "dependencies": {
+    "playwright": "^1.52.0"
+  }
+}

@@ -4,48 +4,40 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
 <BaseLayout title="aPulse | 发现世界的新跳动。" description="aPulse | 发现世界的新跳动。">
   <section class="min-h-screen bg-black text-white">
-    <div class="mx-auto grid min-h-screen max-w-7xl grid-cols-1 xl:grid-cols-[17rem_minmax(0,1fr)_22rem]">
-      <aside class="hidden border-r border-white/10 px-6 py-8 xl:block">
-        <div class="sticky top-0 space-y-8">
+    <div class="flex min-h-screen" style="width:100%;max-width:1600px;margin:0 auto">
+      <aside class="hidden border-r border-white/10 px-6 py-8 xl:sticky xl:top-0 xl:block xl:h-screen xl:w-[17rem] xl:shrink-0 xl:overflow-y-auto">
+        <div class="space-y-8">
           <a
             href="/"
             class="inline-flex items-center gap-3 rounded-full border border-sky-400/20 bg-sky-400/10 px-5 py-3 text-3xl font-black italic tracking-tight text-sky-400 transition hover:scale-[1.02] hover:border-sky-300/40 hover:bg-sky-400/15"
-            aria-label="aPulse Home"
+            aria-label="aPulse Home" transition:name="logo"
           >
             <span class="inline-flex h-3 w-3 rounded-full bg-sky-300 shadow-[0_0_20px_rgba(56,189,248,0.9)]"></span>
             <span>aPulse</span>
           </a>
 
           <nav class="space-y-2">
-            <a href="#composer" class="flex items-center gap-3 rounded-full px-4 py-3 text-base font-semibold transition hover:bg-white/[0.06]">
-              <span class="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/[0.06] text-lg">⌂</span>
+            <a href="/" class="flex items-center gap-3 rounded-full px-4 py-3 text-base font-semibold transition hover:bg-white/[0.06]" data-view="timeline">
+              <span class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-white/[0.06] text-xl">⌂</span>
               <span>主页</span>
             </a>
-            <a href="#timeline" class="flex items-center gap-3 rounded-full px-4 py-3 text-base font-semibold text-white/70 transition hover:bg-white/[0.06] hover:text-white">
-              <span class="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/[0.06] text-lg">#</span>
-              <span>时间线</span>
+            <a href="/photos" class="flex items-center gap-3 rounded-full px-4 py-3 text-base font-semibold text-white/70 transition hover:bg-white/[0.06] hover:text-white">
+              <span class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-white/[0.06] text-xl">📷</span>
+              <span>照片墙</span>
             </a>
-            <a href="#status-card" class="flex items-center gap-3 rounded-full px-4 py-3 text-base font-semibold text-white/70 transition hover:bg-white/[0.06] hover:text-white">
-              <span class="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/[0.06] text-lg">@</span>
-              <span>会话</span>
-            </a>
-            <a href="/" class="flex items-center gap-3 rounded-full px-4 py-3 text-base font-semibold text-white/70 transition hover:bg-white/[0.06] hover:text-white">
-              <span class="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/[0.06] text-lg">🔖</span>
+            <a href="/" class="flex items-center gap-3 rounded-full px-4 py-3 text-base font-semibold text-white/70 transition hover:bg-white/[0.06] hover:text-white" data-view="bookmarks">
+              <span class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-white/[0.06] text-xl">🔖</span>
               <span>书签</span>
             </a>
-            <a href="#" id="nav-notifications" class="flex items-center gap-3 rounded-full px-4 py-3 text-base font-semibold text-white/70 transition hover:bg-white/[0.06] hover:text-white">
-              <span class="relative inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/[0.06] text-lg">
-                🔔
-                <span id="notif-badge" class="absolute -right-0.5 -top-0.5 hidden h-4 min-w-[1rem] items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold leading-none text-white shadow">0</span>
-              </span>
-              <span>通知</span>
+            <a href="/" class="flex items-center gap-3 rounded-full px-4 py-3 text-base font-semibold text-white/70 transition hover:bg-white/[0.06] hover:text-white" data-view="starred">
+              <span class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-white/[0.06] text-xl">⭐</span>
+              <span>精华</span>
             </a>
           </nav>
 
-          <div id="notif-panel" class="hidden rounded-3xl border border-white/10 bg-zinc-900 p-4 shadow-2xl">
-            <div class="mb-3 flex items-center justify-between">
+          <div id="notif-panel" class="rounded-3xl border border-white/10 bg-zinc-900 p-4 shadow-2xl">
+            <div class="mb-3">
               <h3 class="text-sm font-bold text-white">通知</h3>
-              <button id="notif-mark-read" type="button" class="text-xs text-cyan-400 transition hover:text-cyan-300">全部已读</button>
             </div>
             <div id="notif-list" class="max-h-80 space-y-2 overflow-y-auto">
               <p class="py-4 text-center text-xs text-white/40">暂无通知。</p>
@@ -58,8 +50,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             <p id="session-identity" class="mt-0.5 text-xs text-white/40"></p>
             <div id="sidebar-login-buttons" class="mt-3 flex flex-wrap gap-2">
               <button id="google-login-button" type="button" class="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-semibold text-white/70 transition hover:border-sky-400/40 hover:bg-sky-400/10 hover:text-white">Google</button>
+              <button id="email-login-button" type="button" class="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-semibold text-white/70 transition hover:border-cyan-400/40 hover:bg-cyan-400/10 hover:text-white">✉️ 密码</button>
               <button id="anon-login-button" type="button" class="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-semibold text-white/70 transition hover:border-cyan-400/40 hover:bg-cyan-400/10 hover:text-white">匿名</button>
               <button id="edit-profile-button" type="button" class="rounded-full border border-amber-400/20 bg-amber-400/10 px-3 py-1.5 text-xs font-semibold text-amber-300/80 transition hover:border-amber-300/40 hover:bg-amber-400/15 hover:text-amber-200">✏️ 资料</button>
+              <button id="sign-out-button" type="button" class="hidden rounded-full border border-rose-400/20 bg-rose-500/10 px-3 py-1.5 text-xs font-semibold text-rose-300/80 transition hover:border-rose-300/40 hover:bg-rose-500/15 hover:text-rose-200">退出</button>
             </div>
           </div>
         </div>
@@ -71,7 +65,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             <p class="text-[11px] font-semibold uppercase tracking-[0.35em] text-cyan-400">For You</p>
             <div class="mt-2 flex items-end justify-between gap-4">
               <div>
-                <h1 class="text-2xl font-black tracking-tight text-white">Home</h1>
+                <h1 class="text-2xl font-black tracking-tight text-white" transition:name="page-title">Home</h1>
                 <p class="mt-1 text-sm text-white/55">Astro + Supabase 的实时推文流</p>
               </div>
               <button
@@ -140,6 +134,38 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                     </div>
                   </div>
 
+                  <!-- 照片标签：地点选择 + 主题 -->
+                  <div id="photo-meta" class="mt-3 hidden flex-col gap-3">
+                    <div>
+                      <button id="city-picker-btn" type="button" class="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs text-white/60 transition hover:border-cyan-400/30 hover:text-cyan-300">
+                        📍 <span id="city-display">选择拍摄地</span>
+                      </button>
+                      <div id="city-picker-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/70 backdrop-blur-sm">
+                        <div class="max-h-[80vh] w-full max-w-lg overflow-y-auto rounded-3xl border border-white/10 bg-zinc-900 p-5 shadow-2xl">
+                          <div class="mb-4 flex items-center justify-between">
+                            <h3 class="text-sm font-bold text-white">选择拍摄地</h3>
+                            <button id="city-picker-close" type="button" class="inline-flex h-7 w-7 items-center justify-center rounded-full text-white/50 transition hover:bg-white/[0.06] hover:text-white">
+                              <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                            </button>
+                          </div>
+                          <div id="province-grid" class="grid grid-cols-4 gap-2"></div>
+                          <div id="city-grid" class="mt-3 hidden">
+                            <p class="mb-2 text-[11px] font-semibold uppercase tracking-wider text-white/30">选择城市</p>
+                            <div class="flex flex-wrap gap-2" id="city-list"></div>
+                          </div>
+                          <p id="selected-city-display" class="mt-3 text-center text-xs text-cyan-300 hidden"></p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="flex flex-wrap gap-1.5" id="topic-buttons">
+                      <span class="text-[10px] font-semibold uppercase tracking-wider text-white/30 mr-1 self-center">风格</span>
+                      <button type="button" class="topic-btn rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-white/60 transition hover:border-cyan-400/30 hover:text-white" data-topic="街拍">街拍</button>
+                      <button type="button" class="topic-btn rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-white/60 transition hover:border-cyan-400/30 hover:text-white" data-topic="风光">风光</button>
+                      <button type="button" class="topic-btn rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-white/60 transition hover:border-cyan-400/30 hover:text-white" data-topic="人像">人像</button>
+                      <button type="button" class="topic-btn rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-white/60 transition hover:border-cyan-400/30 hover:text-white" data-topic="meme">meme</button>
+                    </div>
+                  </div>
+
                   <div class="mt-4 flex flex-col gap-3 border-t border-white/10 pt-4 sm:flex-row sm:items-center sm:justify-between">
                     <div class="space-y-3">
                       <div class="flex flex-wrap items-center gap-2">
@@ -200,7 +226,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         </section>
       </main>
 
-      <aside class="hidden px-6 py-8 xl:block">
+      <aside id="right-sidebar" class="hidden px-6 py-8 xl:block xl:w-[22rem] xl:shrink-0">
         <div class="sticky top-0 space-y-5">
           <section class="rounded-3xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur">
             <div class="relative">
@@ -260,6 +286,33 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     </div>
   </div>
 
+  <!-- 登录/注册弹窗 -->
+  <div id="auth-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/60 backdrop-blur-sm">
+    <div class="w-full max-w-sm rounded-3xl border border-white/10 bg-zinc-900 p-6 shadow-2xl">
+      <div class="flex items-center justify-between">
+        <h3 id="auth-modal-title" class="text-lg font-bold text-white">登录</h3>
+        <button id="auth-modal-close" type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-full text-white/50 transition hover:bg-white/[0.06] hover:text-white">
+          <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+      <div class="mt-5 space-y-4">
+        <div>
+          <label class="text-xs font-semibold text-white/50 uppercase tracking-wider">邮箱</label>
+          <input id="auth-email-input" type="email" autocomplete="email" class="mt-1.5 w-full rounded-xl border border-white/10 bg-white/[0.05] px-4 py-2.5 text-sm text-white outline-none placeholder:text-white/30 focus:border-cyan-400/40" placeholder="your@email.com" />
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-white/50 uppercase tracking-wider">密码</label>
+          <input id="auth-password-input" type="password" autocomplete="current-password" class="mt-1.5 w-full rounded-xl border border-white/10 bg-white/[0.05] px-4 py-2.5 text-sm text-white outline-none placeholder:text-white/30 focus:border-cyan-400/40" placeholder="至少 6 位" />
+        </div>
+        <button id="auth-submit-btn" type="button" class="w-full rounded-full bg-cyan-500 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400">登录</button>
+        <p id="auth-status" class="text-center text-xs text-white/40"></p>
+        <p class="text-center text-xs text-white/30">
+          <button id="auth-toggle-btn" type="button" class="text-cyan-400 hover:text-cyan-300 transition">没有账号？点击注册</button>
+        </p>
+      </div>
+    </div>
+  </div>
+
   <script>
   import { createBrowserSupabase } from '../lib/supabase.js';
 
@@ -287,7 +340,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   const notifPanel = document.querySelector('#notif-panel');
   const notifList = document.querySelector('#notif-list');
   const notifBadge = document.querySelector('#notif-badge');
-  const notifMarkRead = document.querySelector('#notif-mark-read');
   const notifNav = document.querySelector('#nav-notifications');
   const charCount = document.querySelector('#char-count');
   const charRingProgress = document.querySelector('#char-ring-progress');
@@ -298,12 +350,35 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   const CHAR_RING_CIRCUMFERENCE = 97.39;
 
   let session = null;
-  let refreshInFlight = false;
+  let fetchSeq = 0;
   let realtimeChannel = null;
   let authErrorMessage = '';
   let selectedImageFile = null;
   let selectedImagePreviewUrl = '';
-  let currentView = 'timeline'; // 'timeline' | 'bookmarks' | 'search'
+  let selectedTopic = '';
+  let selectedCity = '';
+
+  const PROVINCES = {
+    '北京': ['北京'], '天津': ['天津'], '上海': ['上海'], '重庆': ['重庆'],
+    '江苏': ['南京', '苏州', '无锡', '常州', '南通', '扬州', '镇江', '徐州', '盐城', '淮安', '连云港', '泰州', '宿迁'],
+    '浙江': ['杭州', '宁波', '温州', '嘉兴', '湖州', '绍兴', '金华', '台州', '舟山', '衢州', '丽水'],
+    '广东': ['广州', '深圳', '珠海', '东莞', '佛山', '中山', '惠州', '汕头', '湛江', '肇庆', '江门', '茂名'],
+    '四川': ['成都', '绵阳', '德阳', '宜宾', '南充', '泸州', '乐山', '自贡', '达州', '凉山'],
+    '湖北': ['武汉', '宜昌', '襄阳', '荆州', '黄石', '十堰', '孝感', '荆门'],
+    '湖南': ['长沙', '株洲', '湘潭', '衡阳', '岳阳', '常德', '郴州', '怀化'],
+    '福建': ['厦门', '福州', '泉州', '漳州', '莆田', '龙岩', '三明', '南平'],
+    '山东': ['青岛', '济南', '烟台', '威海', '潍坊', '临沂', '淄博', '济宁', '泰安', '日照'],
+    '陕西': ['西安', '咸阳', '宝鸡', '延安', '汉中', '渭南'],
+    '云南': ['昆明', '大理', '丽江', '香格里拉', '西双版纳', '红河'],
+    '海南': ['三亚', '海口', '万宁', '陵水'],
+    '辽宁': ['大连', '沈阳', '鞍山', '锦州', '丹东'],
+    '黑龙江': ['哈尔滨', '大庆', '齐齐哈尔', '牡丹江', '佳木斯'],
+    '新疆': ['乌鲁木齐', '伊犁', '喀什', '吐鲁番'],
+    '西藏': ['拉萨', '日喀则', '林芝'],
+    '香港': ['香港'], '澳门': ['澳门'], '台湾': ['台北', '高雄', '台中', '台南'],
+  };
+  const PROVINCE_NAMES = Object.keys(PROVINCES);
+  let currentView = 'timeline'; // 'timeline' | 'bookmarks' | 'starred' | 'search'
 
   function escapeHtml(value) {
     return String(value)
@@ -330,12 +405,15 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     if (!session) return { label: '未登录', sub: '' };
     const provider = session.user?.app_metadata?.provider;
     const shortId = session.user.id.slice(0, 8);
+    const email = session.user.email || '';
+    const prefix = email.split('@')[0] || shortId;
     if (provider === 'google') {
-      const email = session.user.email || '';
-      const prefix = email.split('@')[0] || shortId;
-      return { label: `🌟 正式成员`, sub: prefix };
+      return { label: `🌟 Google · ${prefix}`, sub: email || shortId };
     }
-    return { label: `👣 游客模式`, sub: shortId };
+    if (provider === 'email') {
+      return { label: `🔐 ${prefix}`, sub: email };
+    }
+    return { label: `👣 游客`, sub: shortId };
   }
 
   function updateSessionLabel() {
@@ -375,9 +453,17 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
     selectedImageFile = null;
     selectedImagePreviewUrl = '';
+    selectedTopic = '';
+    selectedCity = '';
     imageInput.value = '';
     imagePreview.removeAttribute('src');
     imagePreviewPanel.classList.add('hidden');
+    const photoMeta = document.querySelector('#photo-meta');
+    const cdEl = document.querySelector("#city-display"); if (cdEl) { cdEl.textContent = "选择拍摄地"; cdEl.classList.remove("text-cyan-300"); cdEl.classList.add("text-white/60"); }
+    if (photoMeta) photoMeta.classList.add('hidden');
+    document.querySelectorAll('.topic-btn').forEach(b => {
+      b.classList.remove('bg-cyan-400/20', 'text-cyan-200', 'border-cyan-400/30');
+    });
 
     if (!preserveStatus) {
       updateComposerState();
@@ -470,9 +556,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     if (!tweets.length) {
       const msg = currentView === 'bookmarks'
         ? '还没有收藏任何推文。'
-        : currentView === 'search'
-          ? '没有找到匹配的推文。'
-          : '还没有推文，发出第一条吧。';
+        : currentView === 'starred'
+          ? '还没有标记精华的推文。'
+          : currentView === 'search'
+            ? '没有找到匹配的推文。'
+            : '还没有推文，发出第一条吧。';
       feedList.innerHTML = `
         <article class="px-4 py-12 sm:px-6">
           <div class="rounded-3xl border border-dashed border-white/15 bg-white/[0.03] px-6 py-10 text-center text-white/50">${msg}</div>
@@ -582,17 +670,44 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   }
 
   async function fetchTweets({ silent = false } = {}) {
-    if (refreshInFlight) return;
-    refreshInFlight = true;
+    const seq = ++fetchSeq;
 
-    if (!silent) feedStatus.textContent = currentView === 'bookmarks' ? '正在加载收藏...' : currentView === 'search' ? '搜索中...' : '正在同步最新推文...';
+    if (!silent) feedStatus.textContent = currentView === 'bookmarks'
+      ? '正在加载收藏...'
+      : currentView === 'starred'
+        ? '正在加载精华...'
+        : currentView === 'search'
+          ? '搜索中...'
+          : '正在同步最新推文...';
 
     try {
       let data;
       if (currentView === 'bookmarks' && session) {
-        const { data: rpcData, error: bErr } = await supabase.rpc('get_bookmark_timeline', { uid: session.user.id, max_results: 50 });
+        const { data: ids, error: bErr } = await supabase
+          .from('bookmarks')
+          .select('tweet_id')
+          .eq('user_id', session.user.id)
+          .order('created_at', { ascending: false })
+          .limit(50);
         if (bErr) throw new Error(toFriendlyErrorMessage(bErr));
-        data = rpcData ?? [];
+        const tweetIds = (ids || []).map(r => r.tweet_id);
+        if (tweetIds.length) {
+          const { data: tweets } = await supabase.from('tweets').select('*').in('id', tweetIds).order('created_at', { ascending: false });
+          data = tweets ?? [];
+        } else { data = []; }
+      } else if (currentView === 'starred' && session) {
+        const { data: ids, error: sErr } = await supabase
+          .from('featured_stars')
+          .select('tweet_id')
+          .eq('user_id', session.user.id)
+          .order('created_at', { ascending: false })
+          .limit(50);
+        if (sErr) throw new Error(toFriendlyErrorMessage(sErr));
+        const tweetIds = (ids || []).map(r => r.tweet_id);
+        if (tweetIds.length) {
+          const { data: tweets } = await supabase.from('tweets').select('*').in('id', tweetIds).order('created_at', { ascending: false });
+          data = tweets ?? [];
+        } else { data = []; }
       } else if (currentView === 'search' && searchQuery) {
         const { data: rpcData, error: sErr } = await supabase.rpc('search_timeline', { query_text: searchQuery, max_results: 20 });
         if (sErr) throw new Error(toFriendlyErrorMessage(sErr));
@@ -602,6 +717,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         if (tErr) throw new Error(toFriendlyErrorMessage(tErr));
         data = rpcData ?? [];
       }
+
+      // 如果已经被更新的请求覆盖，跳过渲染
+      if (seq !== fetchSeq) return;
 
       let likedIds = [], bookmarkedIds = [], starredIds = [];
       if (session) {
@@ -619,63 +737,92 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       feedStatus.textContent = `已更新 ${formatRelativeTime(new Date().toISOString())}`;
     } catch (error) {
       feedStatus.textContent = error.message;
-    } finally {
-      refreshInFlight = false;
     }
   }
 
   async function toggleLike(tweetId) {
     if (!session) return;
-    const { data: existing } = await supabase
+    // DELETE 并检查是否删除了行 — 比 SELECT→DELETE/INSERT 省一次往返
+    const { data: deleted } = await supabase
       .from('tweet_likes')
-      .select('tweet_id')
+      .delete()
       .eq('tweet_id', tweetId)
       .eq('user_id', session.user.id)
-      .maybeSingle();
+      .select();
 
-    if (existing) {
-      await supabase.from('tweet_likes').delete().eq('tweet_id', tweetId).eq('user_id', session.user.id);
-    } else {
+    const liked = !deleted || deleted.length === 0;
+    if (liked) {
       await supabase.from('tweet_likes').insert({ tweet_id: tweetId, user_id: session.user.id });
     }
 
-    await fetchTweets({ silent: true });
+    const btn = document.querySelector(`[data-like-id="${tweetId}"]`);
+    if (btn) {
+      btn.classList.toggle('text-rose-300', liked);
+      btn.classList.toggle('text-white/45', !liked);
+      const svg = btn.querySelector('svg');
+      if (svg) {
+        svg.setAttribute('fill', liked ? '#fb7185' : 'none');
+        svg.setAttribute('stroke', liked ? '#fb7185' : 'currentColor');
+      }
+      const countEl = btn.querySelector('span');
+      if (countEl) {
+        countEl.textContent = liked
+          ? (parseInt(countEl.textContent) || 0) + 1
+          : Math.max(0, (parseInt(countEl.textContent) || 1) - 1);
+      }
+    }
   }
 
   async function toggleBookmark(tweetId) {
     if (!session) return;
-    const { data: existing } = await supabase
+    const { data: deleted } = await supabase
       .from('bookmarks')
-      .select('tweet_id')
+      .delete()
       .eq('tweet_id', tweetId)
       .eq('user_id', session.user.id)
-      .maybeSingle();
+      .select();
 
-    if (existing) {
-      await supabase.from('bookmarks').delete().eq('tweet_id', tweetId).eq('user_id', session.user.id);
-    } else {
+    const bookmarked = !deleted || deleted.length === 0;
+    if (bookmarked) {
       await supabase.from('bookmarks').insert({ tweet_id: tweetId, user_id: session.user.id });
     }
 
-    await fetchTweets({ silent: true });
+    const btn = document.querySelector(`[data-bookmark-id="${tweetId}"]`);
+    if (btn) {
+      btn.classList.toggle('text-amber-300', bookmarked);
+      btn.classList.toggle('text-white/45', !bookmarked);
+      const svg = btn.querySelector('svg');
+      if (svg) {
+        svg.setAttribute('fill', bookmarked ? '#f59e0b' : 'none');
+        svg.setAttribute('stroke', bookmarked ? '#f59e0b' : 'currentColor');
+      }
+    }
   }
 
   async function toggleFeaturedStar(tweetId) {
     if (!session) return;
-    const { data: existing } = await supabase
+    const { data: deleted } = await supabase
       .from('featured_stars')
-      .select('tweet_id')
+      .delete()
       .eq('tweet_id', tweetId)
       .eq('user_id', session.user.id)
-      .maybeSingle();
+      .select();
 
-    if (existing) {
-      await supabase.from('featured_stars').delete().eq('tweet_id', tweetId).eq('user_id', session.user.id);
-    } else {
+    const starred = !deleted || deleted.length === 0;
+    if (starred) {
       await supabase.from('featured_stars').insert({ tweet_id: tweetId, user_id: session.user.id });
     }
 
-    await fetchTweets({ silent: true });
+    const btn = document.querySelector(`[data-star-id="${tweetId}"]`);
+    if (btn) {
+      btn.classList.toggle('text-sky-300', starred);
+      btn.classList.toggle('text-white/45', !starred);
+      const svg = btn.querySelector('svg');
+      if (svg) {
+        svg.setAttribute('fill', starred ? '#38bdf8' : 'none');
+        svg.setAttribute('stroke', starred ? '#38bdf8' : 'currentColor');
+      }
+    }
   }
 
   async function deleteComment(commentId) {
@@ -693,19 +840,29 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     await fetchTweets({ silent: true });
   }
 
-  function toggleBookmarkView() {
-    if (currentView === 'bookmarks') {
-      currentView = 'timeline';
-    } else {
-      currentView = 'bookmarks';
-    }
+  function setView(view, title) {
+    currentView = view;
     const feedTitle = document.querySelector('h1');
-    if (feedTitle) feedTitle.textContent = currentView === 'bookmarks' ? '书签' : 'Home';
+    if (title) {
+      if (feedTitle) feedTitle.textContent = title;
+    } else {
+      const titles = { timeline: 'Home', bookmarks: '书签', starred: '精华', search: '搜索' };
+      if (feedTitle) feedTitle.textContent = titles[view] || 'Home';
+    }
+    // 只在 timeline 视图显示发帖编辑器
+    const composer = document.querySelector('#composer');
+    if (composer) {
+      composer.classList.toggle('hidden', view !== 'timeline');
+    }
+    // 书签/精华时隐藏右侧栏，最大化内容宽度
+    const rightSidebar = document.querySelector('#right-sidebar');
+    if (rightSidebar) {
+      rightSidebar.style.display = (view === 'bookmarks' || view === 'starred') ? 'none' : '';
+    }
     fetchTweets();
   }
 
   let notifChannel = null;
-  let notifOpen = false;
 
   function getNotifMessage(n) {
     const src = n.source_user_id ? `@${n.source_user_id.slice(0, 8)}` : '某人';
@@ -750,13 +907,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     }
   }
 
-  async function markAllNotifRead() {
-    if (!session) return;
-    await supabase.from('notifications').update({ read: true }).eq('target_user_id', session.user.id).eq('read', false);
-    notifBadge.classList.add('hidden');
-    if (notifOpen) loadNotifications();
-  }
-
   function mountNotifRealtime() {
     notifChannel?.unsubscribe();
     if (!session) return;
@@ -764,7 +914,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       .channel('notif-channel')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: `target_user_id=eq.${session.user.id}` }, () => {
         updateNotifBadge();
-        if (notifOpen) loadNotifications();
+        loadNotifications();
       })
       .subscribe();
   }
@@ -778,16 +928,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       const q = document.querySelector('#search-input').value.trim();
       if (!q) {
         if (currentView === 'search') {
-          currentView = 'timeline';
-          document.querySelector('h1').textContent = 'Home';
-          fetchTweets();
+          setView('timeline');
         }
         return;
       }
       searchQuery = q;
-      currentView = 'search';
-      document.querySelector('h1').textContent = `搜索: ${q}`;
-      fetchTweets();
+      setView('search', `搜索: ${q}`);
     }, 400);
   }
 
@@ -911,9 +1057,14 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         imageUrl = publicUrlData.publicUrl;
       }
 
+      const photoCity = selectedCity || null;
+      const photoTopic = selectedTopic || null;
+
       const { error } = await supabase.from('tweets').insert({
         content,
         image_url: imageUrl,
+        city: photoCity,
+        topic: photoTopic,
       });
 
       if (error) {
@@ -991,6 +1142,42 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     }
   }
 
+  let authMode = 'login';
+
+  async function signInWithEmail() {
+    const email = document.querySelector('#auth-email-input').value.trim();
+    const password = document.querySelector('#auth-password-input').value;
+    const statusEl = document.querySelector('#auth-status');
+    if (!email || !password) { statusEl.textContent = '请填写邮箱和密码。'; return; }
+    if (password.length < 6) { statusEl.textContent = '密码至少需要 6 位。'; return; }
+    statusEl.textContent = '登录中...';
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) { statusEl.textContent = error.message; return; }
+    document.querySelector('#auth-modal').classList.add('hidden');
+    document.querySelector('#auth-email-input').value = '';
+    document.querySelector('#auth-password-input').value = '';
+    statusEl.textContent = '';
+  }
+
+  async function signUpWithEmail() {
+    const email = document.querySelector('#auth-email-input').value.trim();
+    const password = document.querySelector('#auth-password-input').value;
+    const statusEl = document.querySelector('#auth-status');
+    if (!email || !password) { statusEl.textContent = '请填写邮箱和密码。'; return; }
+    if (password.length < 6) { statusEl.textContent = '密码至少需要 6 位。'; return; }
+    statusEl.textContent = '注册中...';
+    const { error } = await supabase.auth.signUp({ email, password });
+    if (error) { statusEl.textContent = error.message; return; }
+    statusEl.textContent = '注册成功！请查收验证邮件。';
+  }
+
+  async function signOut() {
+    const { error } = await supabase.auth.signOut();
+    if (error) { feedStatus.textContent = error.message; return; }
+    // onAuthStateChange 会处理 session 清理和按钮状态
+    await fetchTweets();
+  }
+
   function mountRealtime() {
     realtimeChannel?.unsubscribe();
     realtimeChannel = supabase
@@ -1024,17 +1211,129 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     selectedImagePreviewUrl = URL.createObjectURL(nextImage);
     imagePreview.src = selectedImagePreviewUrl;
     imagePreviewPanel.classList.remove('hidden');
+    document.querySelector('#photo-meta').classList.remove('hidden');
     updateComposerState();
   });
   removeImageButton.addEventListener('click', () => clearImageSelection());
+  // 主题按钮选择
+  document.querySelectorAll('.topic-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.topic-btn').forEach(b => {
+        b.classList.remove('bg-cyan-400/20', 'text-cyan-200', 'border-cyan-400/30');
+      });
+      btn.classList.add('bg-cyan-400/20', 'text-cyan-200', 'border-cyan-400/30');
+      selectedTopic = btn.dataset.topic;
+    });
+  });
+  // 城市选择器
+  function renderProvinceGrid() {
+    const grid = document.querySelector('#province-grid');
+    grid.innerHTML = PROVINCE_NAMES.map(p => `
+      <button type="button" class="province-btn rounded-xl border border-white/10 bg-white/[0.03] px-2 py-2.5 text-xs font-semibold text-white/70 transition hover:border-cyan-400/30 hover:bg-cyan-400/10 hover:text-cyan-200" data-province="${p}">
+        ${p}
+      </button>
+    `).join('');
+  }
+  renderProvinceGrid();
+
+  document.querySelector('#province-grid').addEventListener('click', (e) => {
+    const btn = e.target.closest('.province-btn');
+    if (!btn) return;
+    const province = btn.dataset.province;
+    const cities = PROVINCES[province];
+    document.querySelectorAll('.province-btn').forEach(b => {
+      b.classList.remove('border-cyan-400/40', 'bg-cyan-400/15', 'text-cyan-200');
+    });
+    btn.classList.add('border-cyan-400/40', 'bg-cyan-400/15', 'text-cyan-200');
+
+    const cityList = document.querySelector('#city-list');
+    cityList.innerHTML = cities.map(c => `
+      <button type="button" class="city-option rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs text-white/70 transition hover:border-amber-400/30 hover:bg-amber-400/10 hover:text-amber-200" data-city="${c}">
+        ${c}
+      </button>
+    `).join('');
+    document.querySelector('#city-grid').classList.remove('hidden');
+    document.querySelector('#selected-city-display').classList.add('hidden');
+  });
+
+  document.querySelector('#city-list').addEventListener('click', (e) => {
+    const btn = e.target.closest('.city-option');
+    if (!btn) return;
+    selectedCity = btn.dataset.city;
+    document.querySelector('#city-display').textContent = selectedCity;
+    document.querySelector('#city-display').classList.remove('text-white/60');
+    document.querySelector('#city-display').classList.add('text-cyan-300');
+    document.querySelector('#selected-city-display').textContent = `📍 ${selectedCity}`;
+    document.querySelector('#selected-city-display').classList.remove('hidden');
+    setTimeout(() => document.querySelector('#city-picker-modal').classList.add('hidden'), 600);
+  });
+
+  document.querySelector('#city-picker-btn').addEventListener('click', () => {
+    document.querySelector('#city-picker-modal').classList.remove('hidden');
+  });
+  document.querySelector('#city-picker-close').addEventListener('click', () => {
+    document.querySelector('#city-picker-modal').classList.add('hidden');
+  });
+  document.querySelector('#city-picker-modal').addEventListener('click', (e) => {
+    if (e.target === document.querySelector('#city-picker-modal')) {
+      document.querySelector('#city-picker-modal').classList.add('hidden');
+    }
+  });
   googleLoginButton.addEventListener('click', signInWithGoogle);
   anonLoginButton.addEventListener('click', signInAnonymously);
+
+  // 邮箱登录/注册弹窗
+  const emailLoginButton = document.querySelector('#email-login-button');
+  const signOutButton = document.querySelector('#sign-out-button');
+  const authModal = document.querySelector('#auth-modal');
+  const authModalClose = document.querySelector('#auth-modal-close');
+  const authToggleBtn = document.querySelector('#auth-toggle-btn');
+  const authSubmitBtn = document.querySelector('#auth-submit-btn');
+  const authModalTitle = document.querySelector('#auth-modal-title');
+
+  emailLoginButton.addEventListener('click', () => {
+    authMode = 'login';
+    authModalTitle.textContent = '登录';
+    authSubmitBtn.textContent = '登录';
+    authToggleBtn.textContent = '没有账号？点击注册';
+    document.querySelector('#auth-status').textContent = '';
+    authModal.classList.remove('hidden');
+  });
+
+  signOutButton.addEventListener('click', signOut);
+  authModalClose.addEventListener('click', () => authModal.classList.add('hidden'));
+  authModal.addEventListener('click', (e) => { if (e.target === authModal) authModal.classList.add('hidden'); });
+
+  authToggleBtn.addEventListener('click', () => {
+    authMode = authMode === 'login' ? 'register' : 'login';
+    authModalTitle.textContent = authMode === 'login' ? '登录' : '注册';
+    authSubmitBtn.textContent = authMode === 'login' ? '登录' : '注册';
+    authToggleBtn.textContent = authMode === 'login' ? '没有账号？点击注册' : '已有账号？点击登录';
+    document.querySelector('#auth-status').textContent = '';
+  });
+
+  authSubmitBtn.addEventListener('click', () => {
+    if (authMode === 'login') signInWithEmail();
+    else signUpWithEmail();
+  });
+
+  document.querySelector('#auth-password-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') authSubmitBtn.click();
+  });
+
+  function isPersistentSession(s) {
+    if (!s) return false;
+    const p = s.user?.app_metadata?.provider;
+    return p === 'google' || p === 'email';
+  }
 
   supabase.auth.onAuthStateChange((_event, nextSession) => {
     session = nextSession;
     authErrorMessage = '';
     updateSessionLabel();
     updateComposerState();
+    const soBtn = document.querySelector('#sign-out-button');
+    if (soBtn) soBtn.classList.toggle('hidden', !isPersistentSession(nextSession));
   });
 
   // 事件委托：点赞 / 精华星 / 书签 / 删除
@@ -1055,21 +1354,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   const searchInput = document.querySelector('#search-input');
   if (searchInput) searchInput.addEventListener('input', handleSearchInput);
 
-  // 书签导航
-  document.querySelectorAll('nav a').forEach((a) => {
-    if (a.textContent.trim() === '书签') {
-      a.addEventListener('click', (e) => { e.preventDefault(); toggleBookmarkView(); });
-    }
+  // 书签 / 精华 导航
+  document.querySelectorAll('nav a[data-view]').forEach((a) => {
+    a.addEventListener('click', (e) => { e.preventDefault(); setView(a.dataset.view); });
   });
 
-  // 通知面板
-  notifNav.addEventListener('click', (e) => {
-    e.preventDefault();
-    notifOpen = !notifOpen;
-    notifPanel.classList.toggle('hidden', !notifOpen);
-    if (notifOpen) loadNotifications();
-  });
-  notifMarkRead.addEventListener('click', markAllNotifRead);
 
   // 资料弹窗
   const editProfileBtn = document.querySelector('#edit-profile-button');
@@ -1096,5 +1385,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   loadFeaturedTweets();
   loadStats();
   updateNotifBadge();
+  loadNotifications();
 </script>
 </BaseLayout>

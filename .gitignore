@@ -1,5 +1,9 @@
-node_modules/.vite/
+node_modules/
 dist/_astro/
 dist/_worker.js/chunks/
 dist/_worker.js/manifest_*.mjs
-.idea/inspectionProfiles/
+.idea/
+.claude/
+.mcp.json
+prod-ca-2021.crt
+supabase/.temp/
