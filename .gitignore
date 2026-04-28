@@ -7,3 +7,4 @@ dist/_worker.js/manifest_*.mjs
 .mcp.json
 prod-ca-2021.crt
 supabase/.temp/
+.env
