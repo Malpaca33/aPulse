@@ -134,16 +134,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                     </div>
                   </div>
 
-                  <!-- 主题风格选择（始终可见） -->
-                  <div class="mt-3 flex flex-wrap gap-1.5" id="topic-buttons">
-                    <span class="text-[10px] font-semibold uppercase tracking-wider text-white/30 mr-1 self-center">风格</span>
-                    <button type="button" class="topic-btn rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-white/60 transition hover:border-cyan-400/30 hover:text-white" data-topic="街拍">街拍</button>
-                    <button type="button" class="topic-btn rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-white/60 transition hover:border-cyan-400/30 hover:text-white" data-topic="风光">风光</button>
-                    <button type="button" class="topic-btn rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-white/60 transition hover:border-cyan-400/30 hover:text-white" data-topic="人像">人像</button>
-                    <button type="button" class="topic-btn rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-white/60 transition hover:border-cyan-400/30 hover:text-white" data-topic="meme">meme</button>
-                  </div>
-
-                  <!-- 照片标签：地点选择 + EXIF（选择图片后显示） -->
+                  <!-- 照片标签：地点选择 + EXIF + 风格（选择图片后显示） -->
                   <div id="photo-meta" class="mt-3 hidden flex-col gap-3">
                     <div id="exif-info" class="hidden rounded-2xl border border-cyan-400/15 bg-cyan-400/[0.04] px-4 py-3">
                       <div class="flex items-center gap-2 text-xs">
@@ -154,6 +145,13 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                         <p id="exif-camera" class="text-xs text-white/50"></p>
                         <p id="exif-date" class="text-xs text-white/50"></p>
                       </div>
+                    </div>
+                    <div class="flex flex-wrap gap-1.5" id="topic-buttons">
+                      <span class="text-[10px] font-semibold uppercase tracking-wider text-white/30 mr-1 self-center">风格</span>
+                      <button type="button" class="topic-btn rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-white/60 transition hover:border-cyan-400/30 hover:text-white" data-topic="街拍">街拍</button>
+                      <button type="button" class="topic-btn rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-white/60 transition hover:border-cyan-400/30 hover:text-white" data-topic="风光">风光</button>
+                      <button type="button" class="topic-btn rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-white/60 transition hover:border-cyan-400/30 hover:text-white" data-topic="人像">人像</button>
+                      <button type="button" class="topic-btn rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-white/60 transition hover:border-cyan-400/30 hover:text-white" data-topic="meme">meme</button>
                     </div>
                     <div>
                       <button id="city-picker-btn" type="button" class="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs text-white/60 transition hover:border-cyan-400/30 hover:text-cyan-300">
