@@ -134,8 +134,18 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                     </div>
                   </div>
 
-                  <!-- 照片标签：地点选择 + 主题 -->
+                  <!-- 照片标签：地点选择 + EXIF + 主题 -->
                   <div id="photo-meta" class="mt-3 hidden flex-col gap-3">
+                    <div id="exif-info" class="hidden rounded-2xl border border-cyan-400/15 bg-cyan-400/[0.04] px-4 py-3">
+                      <div class="flex items-center gap-2 text-xs">
+                        <span id="exif-status-icon" class="text-base">📡</span>
+                        <span id="exif-status-text" class="text-white/70">读取中...</span>
+                      </div>
+                      <div id="exif-details" class="mt-2 hidden space-y-1">
+                        <p id="exif-camera" class="text-xs text-white/50"></p>
+                        <p id="exif-date" class="text-xs text-white/50"></p>
+                      </div>
+                    </div>
                     <div>
                       <button id="city-picker-btn" type="button" class="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs text-white/60 transition hover:border-cyan-400/30 hover:text-cyan-300">
                         📍 <span id="city-display">选择拍摄地</span>
@@ -378,6 +388,32 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     '香港': ['香港'], '澳门': ['澳门'], '台湾': ['台北', '高雄', '台中', '台南'],
   };
   const PROVINCE_NAMES = Object.keys(PROVINCES);
+
+  const CITY_COORDS = { '北京': [39.9042,116.4074], '天津': [39.1252,117.1908], '上海': [31.2304,121.4737], '重庆': [29.4316,106.9123], '南京': [32.0603,118.7969], '苏州': [31.299,120.5853], '无锡': [31.491,120.3119], '常州': [31.7714,119.974], '南通': [32.0015,120.8642], '扬州': [32.3943,119.4133], '镇江': [32.1912,119.4258], '徐州': [34.2714,117.1862], '盐城': [33.3795,120.1608], '淮安': [33.5151,119.015], '连云港': [34.639,119.2214], '泰州': [32.4605,119.9244], '宿迁': [33.9787,118.2856], '杭州': [30.2741,120.1551], '宁波': [29.8683,121.544], '温州': [27.9939,120.7015], '嘉兴': [30.771,120.7551], '湖州': [30.8939,120.0878], '绍兴': [30.0015,120.58], '金华': [29.1051,119.6476], '台州': [28.6564,121.4208], '舟山': [29.9854,122.206], '衢州': [28.9359,118.875], '丽水': [28.4672,119.923], '广州': [23.1291,113.2644], '深圳': [22.5431,114.0579], '珠海': [22.271,113.5776], '东莞': [23.0208,113.7518], '佛山': [23.0219,113.1214], '中山': [22.5167,113.3783], '惠州': [23.1117,114.4167], '汕头': [23.3539,116.6995], '湛江': [21.2702,110.3599], '肇庆': [23.076,112.4627], '江门': [22.579,113.081], '茂名': [21.663,110.9312], '成都': [30.5728,104.0668], '绵阳': [31.4673,104.7305], '德阳': [31.1275,104.3979], '宜宾': [28.7694,104.6412], '南充': [30.78,106.11], '泸州': [28.871,105.442], '乐山': [29.55,103.75], '自贡': [29.34,104.77], '达州': [31.2,107.5], '凉山': [27.9,102.27], '武汉': [30.5928,114.3055], '宜昌': [30.6919,111.2871], '襄阳': [32.013,112.134], '荆州': [30.335,112.24], '黄石': [30.21,115.07], '十堰': [32.63,110.79], '孝感': [30.92,113.91], '荆门': [31.08,112.19], '长沙': [28.2282,112.9388], '株洲': [27.83,113.15], '湘潭': [27.87,112.95], '衡阳': [26.89,112.59], '岳阳': [29.37,113.12], '常德': [29.04,111.7], '郴州': [25.79,113.02], '怀化': [27.57,110.0], '厦门': [24.4798,118.0894], '福州': [26.0745,119.2965], '泉州': [24.8739,118.6003], '漳州': [24.5133,117.6471], '莆田': [25.454,119.008], '龙岩': [25.18,117.05], '三明': [26.24,117.63], '南平': [26.64,118.17], '青岛': [36.0671,120.3826], '济南': [36.6512,117.1201], '烟台': [37.4667,121.45], '威海': [37.5,122.12], '潍坊': [36.706,119.162], '临沂': [35.07,118.34], '淄博': [36.813,118.055], '济宁': [35.42,116.59], '泰安': [36.19,117.1], '日照': [35.42,119.53], '西安': [34.2611,108.942], '咸阳': [34.35,108.7], '宝鸡': [34.36,107.14], '延安': [36.59,109.48], '汉中': [33.08,107.02], '渭南': [34.51,109.5], '昆明': [25.0389,102.7183], '大理': [25.58,100.23], '丽江': [26.87,100.23], '香格里拉': [27.83,99.7], '西双版纳': [21.95,100.77], '红河': [23.37,103.15], '三亚': [18.2528,109.512], '海口': [20.044,110.349], '万宁': [18.795,110.39], '陵水': [18.51,110.03], '大连': [38.914,121.6147], '沈阳': [41.8057,123.4315], '鞍山': [41.11,122.97], '锦州': [41.11,121.14], '丹东': [40.13,124.38], '哈尔滨': [45.8038,126.535], '大庆': [46.59,125.1], '齐齐哈尔': [47.35,123.97], '牡丹江': [44.58,129.58], '佳木斯': [46.81,130.32], '乌鲁木齐': [43.8256,87.6168], '伊犁': [43.92,81.32], '喀什': [39.47,75.99], '吐鲁番': [42.95,89.19], '拉萨': [29.65,91.14], '日喀则': [29.27,88.88], '林芝': [29.68,94.36], '香港': [22.3193,114.1694], '澳门': [22.1987,113.5439], '台北': [25.033,121.5654], '高雄': [22.6273,120.3014], '台中': [24.1477,120.6736], '台南': [22.9938,120.204] };
+
+  function findNearestCity(lat, lng) {
+    let bestCity = null;
+    let bestDist = Infinity;
+    for (const [city, [clat, clng]] of Object.entries(CITY_COORDS)) {
+      const dist = Math.hypot(lat - clat, lng - clng);
+      if (dist < bestDist) { bestDist = dist; bestCity = city; }
+    }
+    return bestDist < 1.2 ? bestCity : null;
+  }
+
+  async function extractExif(file) {
+    try {
+      const exifr = (await import('exifr')).default;
+      const data = await exifr.parse(file, ['GPSLatitude', 'GPSLongitude', 'DateTimeOriginal', 'Make', 'Model']);
+      if (!data) return null;
+      const lat = data.latitude;
+      const lng = data.longitude;
+      const camera = [data.Make, data.Model].filter(Boolean).join(' ').trim() || null;
+      const date = data.DateTimeOriginal ? new Date(data.DateTimeOriginal).toLocaleDateString('zh-CN') : null;
+      return { lat, lng, camera, date, city: (lat != null && lng != null) ? findNearestCity(lat, lng) : null };
+    } catch { return null; }
+  }
+
   let currentView = 'timeline'; // 'timeline' | 'bookmarks' | 'starred' | 'search'
 
   function escapeHtml(value) {
@@ -446,6 +482,21 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     return value.replace(/[^a-zA-Z0-9._-]/g, '-');
   }
 
+  function clearExifUI() {
+    const exifInfo = document.querySelector('#exif-info');
+    if (exifInfo) exifInfo.classList.add('hidden');
+    const exifDetails = document.querySelector('#exif-details');
+    if (exifDetails) exifDetails.classList.add('hidden');
+    const exifStatusIcon = document.querySelector('#exif-status-icon');
+    if (exifStatusIcon) exifStatusIcon.textContent = '📡';
+    const exifStatusText = document.querySelector('#exif-status-text');
+    if (exifStatusText) exifStatusText.textContent = '读取中...';
+    const exifCamera = document.querySelector('#exif-camera');
+    if (exifCamera) exifCamera.textContent = '';
+    const exifDate = document.querySelector('#exif-date');
+    if (exifDate) exifDate.textContent = '';
+  }
+
   function clearImageSelection({ preserveStatus = false } = {}) {
     if (selectedImagePreviewUrl) {
       URL.revokeObjectURL(selectedImagePreviewUrl);
@@ -461,6 +512,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     const photoMeta = document.querySelector('#photo-meta');
     const cdEl = document.querySelector("#city-display"); if (cdEl) { cdEl.textContent = "选择拍摄地"; cdEl.classList.remove("text-cyan-300"); cdEl.classList.add("text-white/60"); }
     if (photoMeta) photoMeta.classList.add('hidden');
+    clearExifUI();
     document.querySelectorAll('.topic-btn').forEach(b => {
       b.classList.remove('bg-cyan-400/20', 'text-cyan-200', 'border-cyan-400/30');
     });
@@ -1192,7 +1244,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   tweetForm.addEventListener('submit', submitTweet);
   refreshButton.addEventListener('click', () => fetchTweets());
   mediaPickerButton.addEventListener('click', () => imageInput.click());
-  imageInput.addEventListener('change', () => {
+  imageInput.addEventListener('change', async () => {
     const nextImage = imageInput.files?.[0];
 
     if (!nextImage) {
@@ -1212,6 +1264,61 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     imagePreview.src = selectedImagePreviewUrl;
     imagePreviewPanel.classList.remove('hidden');
     document.querySelector('#photo-meta').classList.remove('hidden');
+
+    // 读取 EXIF
+    const exifInfo = document.querySelector('#exif-info');
+    exifInfo.classList.remove('hidden');
+    const exifStatusIcon = document.querySelector('#exif-status-icon');
+    const exifStatusText = document.querySelector('#exif-status-text');
+    exifStatusIcon.textContent = '📡';
+    exifStatusText.textContent = '正在读取照片信息...';
+
+    const exif = await extractExif(nextImage);
+    const exifDetails = document.querySelector('#exif-details');
+    const exifCamera = document.querySelector('#exif-camera');
+    const exifDate = document.querySelector('#exif-date');
+
+    if (exif) {
+      exifStatusIcon.textContent = '✅';
+      const parts = [];
+      if (exif.camera) parts.push(`📷 ${exif.camera}`);
+      if (exif.date) parts.push(`📅 ${exif.date}`);
+      exifStatusText.textContent = parts.length ? parts.join(' · ') : '已读取照片信息';
+      exifStatusText.classList.remove('text-amber-300');
+      exifStatusText.classList.add('text-cyan-300');
+
+      // 显示详细信息
+      if (exif.camera) { exifCamera.textContent = `相机: ${exif.camera}`; exifCamera.classList.remove('hidden'); }
+      else exifCamera.classList.add('hidden');
+      if (exif.date) { exifDate.textContent = `拍摄日期: ${exif.date}`; exifDate.classList.remove('hidden'); }
+      else exifDate.classList.add('hidden');
+      if (exif.camera || exif.date) exifDetails.classList.remove('hidden');
+
+      // GPS → 城市自动填充
+      if (exif.city) {
+        selectedCity = exif.city;
+        const cdEl = document.querySelector('#city-display');
+        cdEl.textContent = exif.city;
+        cdEl.classList.remove('text-white/60');
+        cdEl.classList.add('text-cyan-300');
+      } else if (exif.lat != null && exif.lng != null) {
+        exifStatusIcon.textContent = '📍';
+        exifStatusText.textContent = 'GPS 已识别但无匹配城市，请手动选择';
+        exifStatusText.classList.remove('text-cyan-300');
+        exifStatusText.classList.add('text-amber-300');
+      } else {
+        exifStatusText.textContent = '无 GPS 信息，请手动选择城市';
+        exifStatusText.classList.remove('text-cyan-300');
+        exifStatusText.classList.add('text-amber-300');
+      }
+    } else {
+      exifStatusIcon.textContent = '📷';
+      exifStatusText.textContent = '未读取到 EXIF 信息，请手动补充';
+      exifStatusText.classList.remove('text-cyan-300');
+      exifStatusText.classList.add('text-amber-300');
+      exifDetails.classList.add('hidden');
+    }
+
     updateComposerState();
   });
   removeImageButton.addEventListener('click', () => clearImageSelection());

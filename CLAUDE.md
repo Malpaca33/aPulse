@@ -33,7 +33,7 @@ The like-count is maintained via a database trigger (`sync_tweet_likes_count`) r
 Two tables: `tweets` (id, content, image_url, user_id, likes_count, created_at) and `tweet_likes` (tweet_id, user_id composite PK). RLS policies enforce: tweets publicly readable, only authenticated users can insert/update storage in their own folder, users can only see/like/unlike their own likes.
 
 ### Realtime
-Browser subscribes to `postgres_changes` on both `tweets` and `tweet_likes` tables to auto-refresh the feed. Also polls every 15 seconds as fallback (in the legacy TweetApp component).
+Browser subscribes to `postgres_changes` on both `tweets` and `tweet_likes` tables to auto-refresh the feed.
 
 ### Storage
 Images uploaded to Supabase Storage bucket `images`, path pattern: `{user_id}/{timestamp}-{filename}`. Bucket is public. RLS restricts uploads to authenticated users in their own folder.
@@ -41,6 +41,3 @@ Images uploaded to Supabase Storage bucket `images`, path pattern: `{user_id}/{t
 ### Environment variables (`.env`)
 - `PUBLIC_SUPABASE_URL` — Supabase project URL
 - `PUBLIC_SUPABASE_ANON_KEY` — Supabase anon key
-
-### Two component versions
-There are two versions of the feed component in the repo: `src/components/TweetApp.astro` (legacy, simpler) and an inline `<script>` in `src/pages/index.astro` (current, with image upload support and character ring animation). The index page is the active one.
