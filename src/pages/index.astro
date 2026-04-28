@@ -134,7 +134,16 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                     </div>
                   </div>
 
-                  <!-- 照片标签：地点选择 + EXIF + 主题 -->
+                  <!-- 主题风格选择（始终可见） -->
+                  <div class="mt-3 flex flex-wrap gap-1.5" id="topic-buttons">
+                    <span class="text-[10px] font-semibold uppercase tracking-wider text-white/30 mr-1 self-center">风格</span>
+                    <button type="button" class="topic-btn rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-white/60 transition hover:border-cyan-400/30 hover:text-white" data-topic="街拍">街拍</button>
+                    <button type="button" class="topic-btn rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-white/60 transition hover:border-cyan-400/30 hover:text-white" data-topic="风光">风光</button>
+                    <button type="button" class="topic-btn rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-white/60 transition hover:border-cyan-400/30 hover:text-white" data-topic="人像">人像</button>
+                    <button type="button" class="topic-btn rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-white/60 transition hover:border-cyan-400/30 hover:text-white" data-topic="meme">meme</button>
+                  </div>
+
+                  <!-- 照片标签：地点选择 + EXIF（选择图片后显示） -->
                   <div id="photo-meta" class="mt-3 hidden flex-col gap-3">
                     <div id="exif-info" class="hidden rounded-2xl border border-cyan-400/15 bg-cyan-400/[0.04] px-4 py-3">
                       <div class="flex items-center gap-2 text-xs">
@@ -166,13 +175,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                           <p id="selected-city-display" class="mt-3 text-center text-xs text-cyan-300 hidden"></p>
                         </div>
                       </div>
-                    </div>
-                    <div class="flex flex-wrap gap-1.5" id="topic-buttons">
-                      <span class="text-[10px] font-semibold uppercase tracking-wider text-white/30 mr-1 self-center">风格</span>
-                      <button type="button" class="topic-btn rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-white/60 transition hover:border-cyan-400/30 hover:text-white" data-topic="街拍">街拍</button>
-                      <button type="button" class="topic-btn rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-white/60 transition hover:border-cyan-400/30 hover:text-white" data-topic="风光">风光</button>
-                      <button type="button" class="topic-btn rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-white/60 transition hover:border-cyan-400/30 hover:text-white" data-topic="人像">人像</button>
-                      <button type="button" class="topic-btn rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-white/60 transition hover:border-cyan-400/30 hover:text-white" data-topic="meme">meme</button>
                     </div>
                   </div>
 
@@ -323,6 +325,50 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     </div>
   </div>
 
+  <!-- 分享海报弹窗 -->
+  <div id="share-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/70 backdrop-blur-sm">
+    <div class="w-full max-w-sm rounded-3xl border border-white/10 bg-zinc-900 p-6 shadow-2xl">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-bold text-white">分享推文</h3>
+        <button id="share-modal-close" type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-full text-white/50 transition hover:bg-white/[0.06] hover:text-white">
+          <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+      <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-3 mb-4">
+        <canvas id="share-canvas" class="hidden"></canvas>
+        <img id="share-poster-preview" src="" alt="海报预览" class="w-full rounded-xl" />
+      </div>
+      <div class="flex gap-2">
+        <button id="share-copy-image-btn" type="button" class="flex-1 rounded-full bg-cyan-500 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400">📋 复制海报图片</button>
+        <button id="share-copy-link-btn" type="button" class="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white/70 transition hover:border-cyan-400/40 hover:text-white">🔗 复制链接</button>
+      </div>
+      <p id="share-status" class="mt-3 text-center text-xs text-white/40"></p>
+    </div>
+  </div>
+
+  <style>
+    @keyframes like-bounce {
+      0% { transform: scale(1); }
+      30% { transform: scale(1.35); }
+      60% { transform: scale(0.9); }
+      100% { transform: scale(1); }
+    }
+    @keyframes star-spin {
+      0% { transform: rotate(0deg) scale(1); }
+      50% { transform: rotate(180deg) scale(1.3); }
+      100% { transform: rotate(360deg) scale(1); }
+    }
+    @keyframes bookmark-pop {
+      0% { transform: scale(1); }
+      40% { transform: scale(1.3); }
+      70% { transform: scale(0.95); }
+      100% { transform: scale(1); }
+    }
+    .animate-like { animation: like-bounce 0.4s ease-out; }
+    .animate-star { animation: star-spin 0.5s ease-out; }
+    .animate-bookmark { animation: bookmark-pop 0.4s ease-out; }
+  </style>
+
   <script>
   import { createBrowserSupabase } from '../lib/supabase.js';
 
@@ -369,6 +415,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   let selectedCity = '';
   let imagePublicUrl = '';
   let imageUploadedPath = '';
+  let uploadPromise = null;
 
   const PROVINCES = {
     '北京': ['北京'], '天津': ['天津'], '上海': ['上海'], '重庆': ['重庆'],
@@ -491,14 +538,14 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     const exifDetails = document.querySelector('#exif-details');
 
     // Upload to storage
-    const session = await ensureSession();
-    if (!session) {
+    const currentSession = await ensureSession();
+    if (!currentSession) {
       composerStatus.textContent = '请先登录再上传图片。';
       return;
     }
 
     const fileName = sanitizeFileName(file.name || 'image');
-    const path = `${session.user.id}/${Date.now()}-${fileName}`;
+    const path = `${currentSession.user.id}/${Date.now()}-${fileName}`;
     const { error: uploadError } = await supabase.storage.from('images').upload(path, file, {
       cacheControl: '3600',
       upsert: false,
@@ -542,9 +589,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       if (aiData.topic && !selectedTopic) {
         selectedTopic = aiData.topic;
         document.querySelectorAll('.topic-btn').forEach(b => {
-          b.classList.remove('bg-cyan-400/20', 'text-cyan-200', 'border-cyan-400/30');
+          b.classList.remove('bg-cyan-500', 'text-white', 'border-cyan-400', 'shadow-[0_0_12px_rgba(6,182,212,0.3)]');
           if (b.dataset.topic === aiData.topic) {
-            b.classList.add('bg-cyan-400/20', 'text-cyan-200', 'border-cyan-400/30');
+            b.classList.add('bg-cyan-500', 'text-white', 'border-cyan-400', 'shadow-[0_0_12px_rgba(6,182,212,0.3)]');
           }
         });
       }
@@ -588,32 +635,37 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     if (exifDate) exifDate.textContent = '';
   }
 
-  function clearImageSelection({ preserveStatus = false } = {}) {
+  function clearImageSelection({ preserveStatus = false, keepStorage = false } = {}) {
     if (selectedImagePreviewUrl) {
       URL.revokeObjectURL(selectedImagePreviewUrl);
     }
 
-    // 清理已上传的图片
-    if (imageUploadedPath) {
+    // 清理已上传的图片（仅当图片未被推文引用时）
+    if (imageUploadedPath && !keepStorage) {
       supabase.storage.from('images').remove([imageUploadedPath]);
-      imageUploadedPath = '';
-      imagePublicUrl = '';
     }
+    imageUploadedPath = '';
+    imagePublicUrl = '';
 
     selectedImageFile = null;
     selectedImagePreviewUrl = '';
-    selectedTopic = '';
-    selectedCity = '';
+    if (!preserveStatus) {
+      selectedTopic = '';
+      selectedCity = '';
+    }
+    uploadPromise = null;
     imageInput.value = '';
     imagePreview.removeAttribute('src');
     imagePreviewPanel.classList.add('hidden');
     const photoMeta = document.querySelector('#photo-meta');
-    const cdEl = document.querySelector("#city-display"); if (cdEl) { cdEl.textContent = "选择拍摄地"; cdEl.classList.remove("text-cyan-300"); cdEl.classList.add("text-white/60"); }
+    if (!preserveStatus) {
+      const cdEl = document.querySelector("#city-display"); if (cdEl) { cdEl.textContent = "选择拍摄地"; cdEl.classList.remove("text-cyan-300"); cdEl.classList.add("text-white/60"); }
+      document.querySelectorAll('.topic-btn').forEach(b => {
+        b.classList.remove('bg-cyan-500', 'text-white', 'border-cyan-400', 'shadow-[0_0_12px_rgba(6,182,212,0.3)]');
+      });
+    }
     if (photoMeta) photoMeta.classList.add('hidden');
     clearExifUI();
-    document.querySelectorAll('.topic-btn').forEach(b => {
-      b.classList.remove('bg-cyan-400/20', 'text-cyan-200', 'border-cyan-400/30');
-    });
 
     if (!preserveStatus) {
       updateComposerState();
@@ -666,8 +718,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     submitButton.disabled = !ready;
 
     if (!session) {
-      composerHint.textContent = authErrorMessage ? '当前未建立可用会话' : '正在建立匿名会话...';
-      composerStatus.textContent = authErrorMessage || 'Supabase 会话准备好后即可发帖。';
+      composerHint.textContent = '登录后即可发帖、点赞、评论。';
+      composerStatus.textContent = '点击左侧身份区的按钮选择登录方式。';
       return;
     }
 
@@ -764,6 +816,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                 <svg viewBox="0 0 24 24" class="h-[18px] w-[18px]" fill="${isBookmarked ? '#f59e0b' : 'none'}" stroke="${isBookmarked ? '#f59e0b' : 'currentColor'}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" /></svg>
               </button>
               ${isOwn ? `<button type="button" data-delete-id="${tweet.id}" class="delete-btn ml-auto inline-flex items-center gap-1 text-sm text-white/25 transition hover:text-rose-400" title="删除推文"><svg viewBox="0 0 24 24" class="h-[16px] w-[16px]" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg></button>` : ''}
+              <button type="button" data-share-id="${tweet.id}" class="share-btn inline-flex items-center gap-1 text-sm text-white/35 transition hover:text-cyan-300" title="分享"><svg viewBox="0 0 24 24" class="h-[16px] w-[16px]" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" x2="12" y1="2" y2="15"/></svg></button>
             </div>
             ${comments.length > 0 ? `
             <div class="mt-3 pl-16 ml-6">
@@ -797,26 +850,44 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     if (existingSession) {
       session = existingSession;
       updateSessionLabel();
+      updateLoginButtons(existingSession);
       updateComposerState();
       return existingSession;
     }
 
-    const { data, error } = await supabase.auth.signInAnonymously();
-
-    if (error) {
-      throw new Error(toFriendlyErrorMessage(error));
-    }
-
-    session = data.session ?? null;
-
-    if (!session) {
-      throw new Error('匿名会话创建失败。');
-    }
-
-    authErrorMessage = '';
+    session = null;
     updateSessionLabel();
+    updateLoginButtons(null);
     updateComposerState();
-    return session;
+    return null;
+  }
+
+  function updateLoginButtons(s) {
+    const provider = s?.user?.app_metadata?.provider;
+    const googleBtn = document.querySelector('#google-login-button');
+    const emailBtn = document.querySelector('#email-login-button');
+    const anonBtn = document.querySelector('#anon-login-button');
+    const signOutBtn = document.querySelector('#sign-out-button');
+    const composer = document.querySelector('#composer');
+    const composerHint = document.querySelector('#composer-hint');
+    const composerStatus = document.querySelector('#composer-status');
+
+    if (!s) {
+      googleBtn.classList.remove('hidden');
+      emailBtn.classList.remove('hidden');
+      anonBtn.classList.remove('hidden');
+      signOutBtn.classList.add('hidden');
+      if (composer) composer.classList.add('hidden');
+      if (composerHint) composerHint.textContent = '登录后即可发帖、点赞、评论。';
+      if (composerStatus) composerStatus.textContent = '点击上方按钮选择登录方式。';
+      return;
+    }
+
+    googleBtn.classList.toggle('hidden', provider === 'google');
+    emailBtn.classList.toggle('hidden', provider === 'email');
+    anonBtn.classList.toggle('hidden', provider === 'anonymous');
+    signOutBtn.classList.toggle('hidden', !isPersistentSession(s));
+    if (composer) composer.classList.remove('hidden');
   }
 
   async function fetchTweets({ silent = false } = {}) {
@@ -884,6 +955,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       }
 
       renderTweets(data, likedIds, bookmarkedIds, starredIds);
+      window.__lastFeedData = data;
       feedStatus.textContent = `已更新 ${formatRelativeTime(new Date().toISOString())}`;
     } catch (error) {
       feedStatus.textContent = error.message;
@@ -891,8 +963,19 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   }
 
   async function toggleLike(tweetId) {
-    if (!session) return;
-    // DELETE 并检查是否删除了行 — 比 SELECT→DELETE/INSERT 省一次往返
+    if (!session) { feedStatus.textContent = '请先登录再点赞。'; return; }
+
+    const btn = document.querySelector(`[data-like-id="${tweetId}"]`);
+    // 立即播放动画，覆盖网络延迟
+    if (btn) {
+      const svg = btn.querySelector('svg');
+      if (svg) {
+        svg.style.animation = 'none';
+        svg.offsetHeight;
+        svg.style.animation = 'like-bounce 0.4s ease-out';
+      }
+    }
+
     const { data: deleted } = await supabase
       .from('tweet_likes')
       .delete()
@@ -905,7 +988,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       await supabase.from('tweet_likes').insert({ tweet_id: tweetId, user_id: session.user.id });
     }
 
-    const btn = document.querySelector(`[data-like-id="${tweetId}"]`);
     if (btn) {
       btn.classList.toggle('text-rose-300', liked);
       btn.classList.toggle('text-white/45', !liked);
@@ -924,7 +1006,18 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   }
 
   async function toggleBookmark(tweetId) {
-    if (!session) return;
+    if (!session) { feedStatus.textContent = '请先登录再收藏。'; return; }
+
+    const btn = document.querySelector(`[data-bookmark-id="${tweetId}"]`);
+    if (btn) {
+      const svg = btn.querySelector('svg');
+      if (svg) {
+        svg.style.animation = 'none';
+        svg.offsetHeight;
+        svg.style.animation = 'bookmark-pop 0.4s ease-out';
+      }
+    }
+
     const { data: deleted } = await supabase
       .from('bookmarks')
       .delete()
@@ -937,7 +1030,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       await supabase.from('bookmarks').insert({ tweet_id: tweetId, user_id: session.user.id });
     }
 
-    const btn = document.querySelector(`[data-bookmark-id="${tweetId}"]`);
     if (btn) {
       btn.classList.toggle('text-amber-300', bookmarked);
       btn.classList.toggle('text-white/45', !bookmarked);
@@ -950,7 +1042,18 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   }
 
   async function toggleFeaturedStar(tweetId) {
-    if (!session) return;
+    if (!session) { feedStatus.textContent = '请先登录再加精。'; return; }
+
+    const btn = document.querySelector(`[data-star-id="${tweetId}"]`);
+    if (btn) {
+      const svg = btn.querySelector('svg');
+      if (svg) {
+        svg.style.animation = 'none';
+        svg.offsetHeight;
+        svg.style.animation = 'star-spin 0.5s ease-out';
+      }
+    }
+
     const { data: deleted } = await supabase
       .from('featured_stars')
       .delete()
@@ -963,7 +1066,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       await supabase.from('featured_stars').insert({ tweet_id: tweetId, user_id: session.user.id });
     }
 
-    const btn = document.querySelector(`[data-star-id="${tweetId}"]`);
     if (btn) {
       btn.classList.toggle('text-sky-300', starred);
       btn.classList.toggle('text-white/45', !starred);
@@ -976,14 +1078,14 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   }
 
   async function deleteComment(commentId) {
-    if (!session) return;
+    if (!session) { feedStatus.textContent = '请先登录。'; return; }
     const { error } = await supabase.from('comments').delete().eq('id', commentId).eq('user_id', session.user.id);
     if (error) { feedStatus.textContent = toFriendlyErrorMessage(error); return; }
     await fetchTweets({ silent: true });
   }
 
   async function deleteTweet(tweetId) {
-    if (!session) return;
+    if (!session) { feedStatus.textContent = '请先登录。'; return; }
     if (!confirm('确认删除这条推文？')) return;
     const { error } = await supabase.from('tweets').delete().eq('id', tweetId).eq('user_id', session.user.id);
     if (error) { feedStatus.textContent = toFriendlyErrorMessage(error); return; }
@@ -1169,6 +1271,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   async function submitTweet(event) {
     event.preventDefault();
 
+    if (!session) {
+      composerStatus.textContent = '请先登录再发帖。';
+      return;
+    }
+
     const content = tweetInput.value.trim();
 
     if (!content && !selectedImageFile) {
@@ -1180,17 +1287,17 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     composerStatus.textContent = '正在发帖...';
 
     try {
-      const currentSession = await ensureSession();
-
-      if (!currentSession) {
-        composerStatus.textContent = authErrorMessage || '请先完成登录。';
-        return;
+      // 等待图片上传完成（如果有进行中的上传）
+      if (uploadPromise) {
+        composerStatus.textContent = '正在上传图片...';
+        await uploadPromise;
+        uploadPromise = null;
       }
 
-      // 如果图片还没上传（用户可能在 uploadAndAnalyze 完成前就提交了），做 fallback 上传
+      // 如果图片还没上传（fallback），现在上传
       if (selectedImageFile && !imagePublicUrl) {
         const fileName = sanitizeFileName(selectedImageFile.name || 'image');
-        imageUploadedPath = `${currentSession.user.id}/${Date.now()}-${fileName}`;
+        imageUploadedPath = `${session.user.id}/${Date.now()}-${fileName}`;
         const { error: uploadError } = await supabase.storage.from('images').upload(imageUploadedPath, selectedImageFile, {
           cacheControl: '3600',
           upsert: false,
@@ -1215,23 +1322,30 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       }
 
       tweetInput.value = '';
-      clearImageSelection({ preserveStatus: true });
+      clearImageSelection({ preserveStatus: true, keepStorage: true });
+      uploadPromise = null;
       updateComposerState();
       composerStatus.textContent = '发帖成功。';
       await fetchTweets({ silent: true });
-    } catch (error) {
+    } catch (err) {
       updateComposerState();
-      composerStatus.textContent = toFriendlyErrorMessage(error);
+      composerStatus.textContent = toFriendlyErrorMessage(err);
     }
   }
 
   async function signInAnonymously() {
     try {
       composerStatus.textContent = '正在创建匿名会话...';
-      await ensureSession();
-      composerStatus.textContent = '匿名会话已就绪。';
-    } catch (error) {
-      authErrorMessage = toFriendlyErrorMessage(error);
+      const { data, error } = await supabase.auth.signInAnonymously();
+      if (error) throw new Error(toFriendlyErrorMessage(error));
+      session = data.session ?? null;
+      if (!session) throw new Error('匿名会话创建失败。');
+      authErrorMessage = '';
+      updateSessionLabel();
+      updateLoginButtons(session);
+      updateComposerState();
+    } catch (err) {
+      authErrorMessage = toFriendlyErrorMessage(err);
       updateComposerState();
     }
   }
@@ -1290,12 +1404,22 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     if (!email || !password) { statusEl.textContent = '请填写邮箱和密码。'; return; }
     if (password.length < 6) { statusEl.textContent = '密码至少需要 6 位。'; return; }
     statusEl.textContent = '登录中...';
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) { statusEl.textContent = error.message; return; }
+    session = data.session ?? null;
+    updateSessionLabel();
+    updateLoginButtons(session);
+    updateComposerState();
     document.querySelector('#auth-modal').classList.add('hidden');
     document.querySelector('#auth-email-input').value = '';
     document.querySelector('#auth-password-input').value = '';
     statusEl.textContent = '';
+    if (session) {
+      fetchTweets({ silent: true });
+      loadNotifications();
+      updateNotifBadge();
+      mountNotifRealtime();
+    }
   }
 
   async function signUpWithEmail() {
@@ -1313,7 +1437,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   async function signOut() {
     const { error } = await supabase.auth.signOut();
     if (error) { feedStatus.textContent = error.message; return; }
-    // onAuthStateChange 会处理 session 清理和按钮状态
+    session = null;
+    updateSessionLabel();
+    updateLoginButtons(null);
+    updateComposerState();
     await fetchTweets();
   }
 
@@ -1410,7 +1537,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
     // 上传图片并启动 AI 分析（在 EXIF 完成后异步进行）
     if (selectedImageFile) {
-      uploadAndAnalyze(selectedImageFile);
+      uploadPromise = uploadAndAnalyze(selectedImageFile);
     }
   });
   removeImageButton.addEventListener('click', () => clearImageSelection());
@@ -1418,9 +1545,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   document.querySelectorAll('.topic-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.topic-btn').forEach(b => {
-        b.classList.remove('bg-cyan-400/20', 'text-cyan-200', 'border-cyan-400/30');
+        b.classList.remove('bg-cyan-500', 'text-white', 'border-cyan-400', 'shadow-[0_0_12px_rgba(6,182,212,0.3)]');
       });
-      btn.classList.add('bg-cyan-400/20', 'text-cyan-200', 'border-cyan-400/30');
+      btn.classList.add('bg-cyan-500', 'text-white', 'border-cyan-400', 'shadow-[0_0_12px_rgba(6,182,212,0.3)]');
       selectedTopic = btn.dataset.topic;
     });
   });
@@ -1530,9 +1657,14 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     session = nextSession;
     authErrorMessage = '';
     updateSessionLabel();
+    updateLoginButtons(nextSession);
     updateComposerState();
-    const soBtn = document.querySelector('#sign-out-button');
-    if (soBtn) soBtn.classList.toggle('hidden', !isPersistentSession(nextSession));
+    if (nextSession) {
+      fetchTweets({ silent: true });
+      loadNotifications();
+      updateNotifBadge();
+      mountNotifRealtime();
+    }
   });
 
   // 事件委托：点赞 / 精华星 / 书签 / 删除
@@ -1542,11 +1674,21 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     const bookmarkBtn = e.target.closest('[data-bookmark-id]');
     const deleteBtn = e.target.closest('[data-delete-id]');
     const commentDeleteBtn = e.target.closest('[data-comment-delete-id]');
+    const shareBtn = e.target.closest('[data-share-id]');
     if (likeBtn) { e.preventDefault(); toggleLike(likeBtn.dataset.likeId); }
     if (starBtn) { e.preventDefault(); toggleFeaturedStar(starBtn.dataset.starId); }
     if (bookmarkBtn) { e.preventDefault(); toggleBookmark(bookmarkBtn.dataset.bookmarkId); }
     if (deleteBtn) { e.preventDefault(); deleteTweet(deleteBtn.dataset.deleteId); }
     if (commentDeleteBtn) { e.preventDefault(); deleteComment(commentDeleteBtn.dataset.commentDeleteId); }
+    if (shareBtn) {
+      e.preventDefault();
+      const tweetId = shareBtn.dataset.shareId;
+      const tweetEl = shareBtn.closest('article');
+      // 找到该推文的数据（从 feed 缓存中取）
+      const feedData = window.__lastFeedData || [];
+      const tweet = feedData.find(t => t.id === tweetId);
+      if (tweet) shareAsPoster(tweet);
+    }
   });
 
   // 搜索事件
@@ -1567,6 +1709,206 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   profileModalClose.addEventListener('click', () => profileModal.classList.add('hidden'));
   profileModal.addEventListener('click', (e) => { if (e.target === profileModal) profileModal.classList.add('hidden'); });
   profileSaveBtn.addEventListener('click', saveProfile);
+
+  // ===== 分享海报 =====
+  const shareModal = document.querySelector('#share-modal');
+  const shareCanvas = document.querySelector('#share-canvas');
+  const sharePosterPreview = document.querySelector('#share-poster-preview');
+  const shareStatus = document.querySelector('#share-status');
+  let currentShareTweetId = '';
+
+  async function generatePoster(tweet) {
+    const W = 600;
+    const padding = 40;
+    const authorName = formatAuthor(tweet.user_id);
+    const shortId = (tweet.user_id || '').slice(0, 8);
+
+    shareCanvas.width = W;
+
+    // 计算高度
+    let y = padding;
+    const maxTextWidth = W - padding * 2;
+    let contentLines = [];
+    if (tweet.content) {
+      const words = tweet.content.split('');
+      let line = '';
+      for (const ch of words) {
+        const testLine = line + ch;
+        if (testLine.length > 40) { contentLines.push(line); line = ch; }
+        else line = testLine;
+      }
+      if (line) contentLines.push(line);
+    }
+
+    // 如果有图片，需要更多高度
+    let imageHeight = 0;
+    if (tweet.image_url) {
+      imageHeight = 280;
+    }
+
+    const contentTextHeight = contentLines.length * 28;
+    const H = padding + 24 + 20 + contentTextHeight + 20 + imageHeight + (imageHeight ? 16 : 0) + 50 + padding + 30;
+    shareCanvas.height = Math.max(H, 300);
+
+    const ctx = shareCanvas.getContext('2d');
+
+    // 背景
+    ctx.fillStyle = '#0a0a0a';
+    const r = 24;
+    ctx.beginPath();
+    ctx.moveTo(r, 0);
+    ctx.lineTo(W - r, 0);
+    ctx.quadraticCurveTo(W, 0, W, r);
+    ctx.lineTo(W, shareCanvas.height - r);
+    ctx.quadraticCurveTo(W, shareCanvas.height, W - r, shareCanvas.height);
+    ctx.lineTo(r, shareCanvas.height);
+    ctx.quadraticCurveTo(0, shareCanvas.height, 0, shareCanvas.height - r);
+    ctx.lineTo(0, r);
+    ctx.quadraticCurveTo(0, 0, r, 0);
+    ctx.fill();
+
+    // 顶部品牌
+    ctx.fillStyle = '#38bdf8';
+    ctx.font = 'bold 20px sans-serif';
+    ctx.fillText('aPulse', padding, y + 20);
+    y += 50;
+
+    // 作者行
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 16px sans-serif';
+    ctx.fillText(authorName, padding, y);
+    ctx.fillStyle = '#888888';
+    ctx.font = '13px sans-serif';
+    ctx.fillText(`@${shortId}`, padding + ctx.measureText(authorName).width + 10, y);
+    y += 32;
+
+    // 分隔线
+    ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+    ctx.beginPath();
+    ctx.moveTo(padding, y);
+    ctx.lineTo(W - padding, y);
+    ctx.stroke();
+    y += 16;
+
+    // 内容
+    ctx.fillStyle = '#e0e0e0';
+    ctx.font = '15px sans-serif';
+    for (const line of contentLines) {
+      ctx.fillText(line, padding, y + 20);
+      y += 28;
+    }
+    if (!tweet.content) {
+      ctx.fillText('[图片]', padding, y + 20);
+      y += 28;
+    }
+
+    // 图片（如果有）
+    if (tweet.image_url && imageHeight > 0) {
+      y += 8;
+      try {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        await new Promise((resolve, reject) => {
+          img.onload = resolve;
+          img.onerror = reject;
+          img.src = tweet.image_url;
+          setTimeout(() => reject(new Error('timeout')), 5000);
+        });
+        const imgW = W - padding * 2;
+        const imgH = imageHeight;
+        ctx.save();
+        ctx.beginPath();
+        ctx.roundRect(padding, y, imgW, imgH, 16);
+        ctx.clip();
+        ctx.drawImage(img, padding, y, imgW, imgH);
+        ctx.restore();
+        y += imgH + 16;
+      } catch { /* 图片加载失败，跳过 */ }
+    }
+
+    // 底部信息
+    y += 8;
+    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+    ctx.beginPath();
+    ctx.moveTo(padding, y);
+    ctx.lineTo(W - padding, y);
+    ctx.stroke();
+    y += 20;
+
+    const metaParts = [];
+    if (tweet.city) metaParts.push(`📍 ${tweet.city}`);
+    if (tweet.topic) metaParts.push(`🏷 ${tweet.topic}`);
+    if (metaParts.length) {
+      ctx.fillStyle = '#999';
+      ctx.font = '12px sans-serif';
+      ctx.fillText(metaParts.join(' · '), padding, y + 16);
+    }
+
+    const timestamp = new Date(tweet.created_at).toLocaleString('zh-CN', { hour12: false });
+    ctx.fillStyle = '#666';
+    ctx.font = '11px sans-serif';
+    ctx.fillText(timestamp, padding, y + 36);
+
+    // 底部品牌口号
+    ctx.fillStyle = '#38bdf8';
+    ctx.font = '11px sans-serif';
+    ctx.fillText('来自 aPulse — 发现世界的新跳动', padding, shareCanvas.height - padding + 10);
+  }
+
+  async function shareAsPoster(tweet) {
+    currentShareTweetId = tweet.id;
+    shareModal.classList.remove('hidden');
+    shareStatus.textContent = '正在生成海报...';
+    sharePosterPreview.classList.add('hidden');
+
+    try {
+      await generatePoster(tweet);
+      const dataUrl = shareCanvas.toDataURL('image/png');
+      sharePosterPreview.src = dataUrl;
+      sharePosterPreview.classList.remove('hidden');
+      shareStatus.textContent = '';
+    } catch (err) {
+      shareStatus.textContent = '海报生成失败';
+      sharePosterPreview.classList.add('hidden');
+    }
+  }
+
+  async function copyPosterImage() {
+    try {
+      const blob = await new Promise(resolve => shareCanvas.toBlob(resolve, 'image/png'));
+      await navigator.clipboard.write([
+        new ClipboardItem({ 'image/png': blob })
+      ]);
+      shareStatus.textContent = '海报已复制到剪贴板 ✓';
+    } catch {
+      // fallback: download
+      const a = document.createElement('a');
+      a.download = `apulse-${currentShareTweetId}.png`;
+      a.href = shareCanvas.toDataURL('image/png');
+      a.click();
+      shareStatus.textContent = '已下载海报图片 ✓';
+    }
+  }
+
+  async function copyTweetLink() {
+    const url = `${location.origin}/tweet/${currentShareTweetId}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      shareStatus.textContent = '链接已复制 ✓';
+    } catch {
+      shareStatus.textContent = url;
+    }
+  }
+
+  document.querySelector('#share-modal-close').addEventListener('click', () => {
+    shareModal.classList.add('hidden');
+    currentShareTweetId = '';
+  });
+  shareModal.addEventListener('click', (e) => {
+    if (e.target === shareModal) { shareModal.classList.add('hidden'); currentShareTweetId = ''; }
+  });
+  document.querySelector('#share-copy-image-btn').addEventListener('click', copyPosterImage);
+  document.querySelector('#share-copy-link-btn').addEventListener('click', copyTweetLink);
 
   updateComposerState();
 
