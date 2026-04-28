@@ -432,76 +432,16 @@ export const prerender = false;
   async function generatePoster() {
     if (!tweet) return;
     const W = 600;
-    const padding = 40;
+    const pad = 44;
+    const cw = W - pad * 2;
     const authorName = formatAuthor(tweet.user_id);
-    const shortId = (tweet.user_id || '').slice(0, 8);
 
-    shareCanvas.width = W;
-    let y = padding;
-    let contentLines = [];
-    if (tweet.content) {
-      const words = tweet.content.split('');
-      let line = '';
-      for (const ch of words) {
-        const testLine = line + ch;
-        if (testLine.length > 40) { contentLines.push(line); line = ch; }
-        else line = testLine;
-      }
-      if (line) contentLines.push(line);
-    }
-
-    let imageHeight = tweet.image_url ? 280 : 0;
-    const contentTextHeight = contentLines.length * 28;
-    const H = padding + 50 + contentTextHeight + 20 + imageHeight + (imageHeight ? 16 : 0) + 50 + padding + 30;
-    shareCanvas.height = Math.max(H, 280);
-
-    const ctx = shareCanvas.getContext('2d');
-    ctx.fillStyle = '#0a0a0a';
-    const r = 24;
-    ctx.beginPath();
-    ctx.moveTo(r, 0);
-    ctx.lineTo(W - r, 0);
-    ctx.quadraticCurveTo(W, 0, W, r);
-    ctx.lineTo(W, shareCanvas.height - r);
-    ctx.quadraticCurveTo(W, shareCanvas.height, W - r, shareCanvas.height);
-    ctx.lineTo(r, shareCanvas.height);
-    ctx.quadraticCurveTo(0, shareCanvas.height, 0, shareCanvas.height - r);
-    ctx.lineTo(0, r);
-    ctx.quadraticCurveTo(0, 0, r, 0);
-    ctx.fill();
-
-    ctx.fillStyle = '#38bdf8';
-    ctx.font = 'bold 20px sans-serif';
-    ctx.fillText('aPulse', padding, y + 20);
-    y += 50;
-
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 16px sans-serif';
-    ctx.fillText(authorName, padding, y);
-    ctx.fillStyle = '#888888';
-    ctx.font = '13px sans-serif';
-    ctx.fillText(`@${shortId}`, padding + ctx.measureText(authorName).width + 10, y);
-    y += 32;
-
-    ctx.strokeStyle = 'rgba(255,255,255,0.1)';
-    ctx.beginPath();
-    ctx.moveTo(padding, y);
-    ctx.lineTo(W - padding, y);
-    ctx.stroke();
-    y += 16;
-
-    ctx.fillStyle = '#e0e0e0';
-    ctx.font = '15px sans-serif';
-    for (const line of contentLines) {
-      ctx.fillText(line, padding, y + 20);
-      y += 28;
-    }
-    if (!tweet.content) { ctx.fillText('[图片]', padding, y + 20); y += 28; }
-
-    if (tweet.image_url && imageHeight > 0) {
-      y += 8;
+    // 先加载图片获取原始尺寸，等比例计算显示区域
+    let img = null;
+    let imgW = 0, imgH = 0;
+    if (tweet.image_url) {
       try {
-        const img = new Image();
+        img = new Image();
         img.crossOrigin = 'anonymous';
         await new Promise((resolve, reject) => {
           img.onload = resolve;
@@ -509,42 +449,133 @@ export const prerender = false;
           img.src = tweet.image_url;
           setTimeout(() => reject(new Error('timeout')), 5000);
         });
-        const imgW = W - padding * 2;
-        ctx.save();
-        ctx.beginPath();
-        ctx.roundRect(padding, y, imgW, imageHeight, 16);
-        ctx.clip();
-        ctx.drawImage(img, padding, y, imgW, imageHeight);
-        ctx.restore();
-        y += imageHeight + 16;
-      } catch {}
+        const maxW = cw;
+        const maxH = 360;
+        const ratio = img.naturalWidth / img.naturalHeight;
+        if (ratio >= maxW / maxH) {
+          imgW = maxW;
+          imgH = maxW / ratio;
+        } else {
+          imgH = maxH;
+          imgW = maxH * ratio;
+        }
+      } catch { img = null; }
+    }
+
+    // 先设 canvas 宽以用 measureText 精确换行
+    shareCanvas.width = W;
+    const ctx = shareCanvas.getContext('2d');
+    ctx.font = "17px -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif";
+    let contentLines = [];
+    if (tweet.content) {
+      let line = '';
+      for (const ch of tweet.content) {
+        if (ctx.measureText(line + ch).width > cw) {
+          contentLines.push(line);
+          line = ch;
+        } else {
+          line += ch;
+        }
+      }
+      if (line) contentLines.push(line);
+    }
+
+    // 计算画布高度
+    let H = pad;
+    H += 28;
+    H += 28;
+    if (img) { H += imgH + 28; }
+    H += contentLines.length * 28;
+    if (!tweet.content && !img) H += 28;
+    H += 24;
+    H += 20;
+    H += 16;
+    H += pad;
+
+    shareCanvas.width = W;
+    shareCanvas.height = Math.max(H, 280);
+
+    // 背景：深色渐变
+    const bg = ctx.createLinearGradient(0, 0, 0, shareCanvas.height);
+    bg.addColorStop(0, '#0b0b14');
+    bg.addColorStop(0.4, '#0e0e1b');
+    bg.addColorStop(1, '#09090f');
+    ctx.fillStyle = bg;
+    ctx.beginPath();
+    ctx.roundRect(0, 0, W, shareCanvas.height, 24);
+    ctx.fill();
+
+    // 顶部装饰点
+    ctx.fillStyle = '#38bdf8';
+    ctx.beginPath();
+    ctx.arc(pad + 5, pad + 6, 5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 顶部品牌
+    ctx.fillStyle = '#ffffff';
+    ctx.font = "600 17px -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif";
+    ctx.fillText('aPulse', pad + 18, pad + 16);
+
+    let y = pad + 28 + 28;
+
+    // 图片（等比例、居中、圆角）
+    if (img) {
+      const ix = pad + (cw - imgW) / 2;
+      ctx.save();
+      ctx.beginPath();
+      ctx.roundRect(ix, y, imgW, imgH, 18);
+      ctx.clip();
+      ctx.drawImage(img, ix, y, imgW, imgH);
+      ctx.restore();
+      y += imgH + 28;
+    }
+
+    // 正文内容
+    ctx.fillStyle = '#e8e8e8';
+    ctx.font = "17px -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif";
+    if (contentLines.length) {
+      for (const line of contentLines) {
+        ctx.fillText(line, pad, y + 22);
+        y += 28;
+      }
+    } else if (!img) {
+      ctx.fillStyle = '#666';
+      ctx.fillText('分享自 aPulse', pad, y + 22);
+      y += 28;
     }
 
     y += 8;
-    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+
+    // 分隔线
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+    ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.moveTo(padding, y);
-    ctx.lineTo(W - padding, y);
+    ctx.moveTo(pad, y);
+    ctx.lineTo(W - pad, y);
     ctx.stroke();
     y += 20;
 
+    // 元信息行
     const metaParts = [];
-    if (tweet.city) metaParts.push(`📍 ${tweet.city}`);
-    if (tweet.topic) metaParts.push(`🏷 ${tweet.topic}`);
-    if (metaParts.length) {
-      ctx.fillStyle = '#999';
-      ctx.font = '12px sans-serif';
-      ctx.fillText(metaParts.join(' · '), padding, y + 16);
-    }
-    const ts = new Date(tweet.created_at).toLocaleString('zh-CN', { hour12: false });
-    ctx.fillStyle = '#666';
-    ctx.font = '11px sans-serif';
-    ctx.fillText(ts, padding, y + 36);
-    ctx.fillStyle = '#38bdf8';
-    ctx.font = '11px sans-serif';
-    ctx.fillText('来自 aPulse — 说什么都能被听见', padding, shareCanvas.height - padding + 10);
-  }
+    if (tweet.city) metaParts.push('\u{1F4CD} ' + tweet.city);
+    if (tweet.topic) metaParts.push('\u{1F3F7} ' + tweet.topic);
+    metaParts.push('@' + authorName);
+    ctx.fillStyle = '#777';
+    ctx.font = "12px -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif";
+    ctx.fillText(metaParts.join('  ·  '), pad, y + 13);
 
+    // 时间
+    const ts = new Date(tweet.created_at).toLocaleString('zh-CN', { hour12: false });
+    ctx.fillStyle = '#4a4a55';
+    ctx.font = "11px -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif";
+    ctx.fillText(ts, pad, y + 30);
+
+    // 底部口号
+    ctx.fillStyle = 'rgba(56,189,248,0.35)';
+    ctx.font = "11px -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif";
+    const slogan = '\u{8BF4}\u{4EC0}\u{4E48}\u{90FD}\u{80FD}\u{88AB}\u{542C}\u{89C1}';
+    ctx.fillText(slogan, W - pad - ctx.measureText(slogan).width, shareCanvas.height - pad + 4);
+  }
   async function shareAsPoster() {
     shareModal.classList.remove('hidden');
     shareStatus.textContent = '正在生成海报...';
