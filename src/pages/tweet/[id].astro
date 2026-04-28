@@ -488,7 +488,6 @@ export const prerender = false;
     H += contentLines.length * 28;
     if (!tweet.content && !img) H += 28;
     H += 24;
-    H += 20;
     H += 16;
     H += pad;
 
@@ -554,15 +553,6 @@ export const prerender = false;
     ctx.lineTo(W - pad, y);
     ctx.stroke();
     y += 20;
-
-    // 元信息行
-    const metaParts = [];
-    if (tweet.city) metaParts.push('\u{1F4CD} ' + tweet.city);
-    if (tweet.topic) metaParts.push('\u{1F3F7} ' + tweet.topic);
-    metaParts.push('@' + authorName);
-    ctx.fillStyle = '#777';
-    ctx.font = "12px -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif";
-    ctx.fillText(metaParts.join('  ·  '), pad, y + 13);
 
     // 时间
     const ts = new Date(tweet.created_at).toLocaleString('zh-CN', { hour12: false });

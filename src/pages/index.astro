@@ -1739,7 +1739,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     H += contentLines.length * 28;    // 正文
     if (!tweet.content && !img) H += 28; // 无内容占位
     H += 24;                          // 分隔区
-    H += 20;                          // meta 行
     H += 16;                          // 时间行
     H += pad;                         // 底部留白
 
@@ -1805,15 +1804,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     ctx.lineTo(W - pad, y);
     ctx.stroke();
     y += 20;
-
-    // 元信息行
-    const metaParts = [];
-    if (tweet.city) metaParts.push('\u{1F4CD} ' + tweet.city);
-    if (tweet.topic) metaParts.push('\u{1F3F7} ' + tweet.topic);
-    metaParts.push('@' + authorName);
-    ctx.fillStyle = '#777';
-    ctx.font = "12px -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif";
-    ctx.fillText(metaParts.join('  ·  '), pad, y + 13);
 
     // 时间
     const ts = new Date(tweet.created_at).toLocaleString('zh-CN', { hour12: false });
