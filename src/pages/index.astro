@@ -2,7 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
-<BaseLayout title="aPulse | 发现世界的新跳动。" description="aPulse | 发现世界的新跳动。">
+<BaseLayout title="aPulse | 说什么都能被听见。" description="aPulse | 说什么都能被听见。">
   <section class="min-h-screen bg-black text-white">
     <div class="flex min-h-screen" style="width:100%;max-width:1600px;margin:0 auto">
       <aside class="hidden border-r border-white/10 px-6 py-8 xl:sticky xl:top-0 xl:block xl:h-screen xl:w-[17rem] xl:shrink-0 xl:overflow-y-auto">
@@ -247,14 +247,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             </div>
           </section>
           <section class="rounded-3xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur">
-            <p class="text-[11px] font-semibold uppercase tracking-[0.35em] text-cyan-400">精选</p>
-            <h2 class="mt-3 text-xl font-bold text-white">精华帖子</h2>
-            <div id="featured-list" class="mt-4 space-y-2 text-sm text-white/65">
-              <p class="text-white/40">加载中...</p>
-            </div>
-          </section>
-
-          <section class="rounded-3xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur">
             <p class="text-[11px] font-semibold uppercase tracking-[0.35em] text-cyan-400">aPulse</p>
             <h2 class="mt-3 text-xl font-bold text-white">脉搏数据</h2>
             <div id="stats-list" class="mt-4 space-y-3">
@@ -390,7 +382,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   const composerStatus = document.querySelector('#composer-status');
   const sessionLabel = document.querySelector('#session-label');
   const sessionIdentity = document.querySelector('#session-identity');
-  const featuredList = document.querySelector('#featured-list');
   const statsPageViews = document.querySelector('#stat-page-views');
   const statsTopContributors = document.querySelector('#stat-top-contributors');
   const notifPanel = document.querySelector('#notif-panel');
@@ -1189,31 +1180,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     }, 400);
   }
 
-  async function loadFeaturedTweets() {
-    const { data, error } = await supabase
-      .from('tweets')
-      .select('id, content, created_at')
-      .eq('is_featured', true)
-      .order('created_at', { ascending: false })
-      .limit(5);
-
-    if (error || !data?.length) {
-      featuredList.innerHTML = '<p class="text-xs text-white/40">暂无精华帖。</p>';
-      return;
-    }
-
-    featuredList.innerHTML = data
-      .map(
-        (t) =>
-          `<a href="/tweet/${t.id}" class="block rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm transition hover:bg-white/[0.06]">${
-            t.content
-              ? `<p class="line-clamp-2 leading-6 text-white/70">${escapeHtml(t.content)}</p>`
-              : '<p class="text-xs text-white/40 italic">[图片推文]</p>'
-          }<p class="mt-1 text-[11px] text-white/30">${formatRelativeTime(t.created_at)}</p></a>`
-      )
-      .join('');
-  }
-
   async function loadStats() {
     try {
       const { data: viewsData } = await supabase.rpc('increment_visit_count');
@@ -1852,7 +1818,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     // 底部品牌口号
     ctx.fillStyle = '#38bdf8';
     ctx.font = '11px sans-serif';
-    ctx.fillText('来自 aPulse — 发现世界的新跳动', padding, shareCanvas.height - padding + 10);
+    ctx.fillText('来自 aPulse — 说什么都能被听见', padding, shareCanvas.height - padding + 10);
   }
 
   async function shareAsPoster(tweet) {
@@ -1923,7 +1889,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   mountRealtime();
   mountNotifRealtime();
   await fetchTweets();
-  loadFeaturedTweets();
   loadStats();
   updateNotifBadge();
   loadNotifications();
