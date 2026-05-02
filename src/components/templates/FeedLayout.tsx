@@ -26,9 +26,9 @@ export function FeedLayout({
   hideRightSidebar,
 }: FeedLayoutProps) {
   return (
-    <div className="mx-auto flex h-screen max-w-[1320px] overflow-hidden">
+    <div className="mx-auto flex h-dvh max-w-[1320px] overflow-hidden">
       {/* Left Sidebar — fixed */}
-      <div className="hidden md:block w-[68px] xl:w-[220px] shrink-0 h-screen overflow-y-auto">
+      <div className="hidden md:block w-[68px] xl:w-[220px] shrink-0 h-full overflow-y-auto">
         <div className="xl:px-3">
           <LeftSidebar
             user={user}
@@ -48,7 +48,7 @@ export function FeedLayout({
 
       {/* Right Sidebar — fixed */}
       {!hideRightSidebar && (
-        <div className="hidden lg:block w-[320px] shrink-0 h-screen overflow-y-auto px-4">
+        <div className="hidden lg:block w-[320px] shrink-0 h-full overflow-y-auto px-4">
           <RightSidebar />
         </div>
       )}
