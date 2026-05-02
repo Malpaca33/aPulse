@@ -1,10 +1,13 @@
-import { useEffect } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useStore } from '@nanostores/react';
+import { Pencil } from 'lucide-react';
 import { QueryProvider } from './QueryProvider';
 import { FeedLayout } from './templates/FeedLayout';
 import { Timeline } from './organisms/Timeline';
+import { EditProfileModal } from './molecules/EditProfileModal';
 import { $session, $sessionLoading, initSession, signInAnonymously, signInWithOAuth, signOut } from '../stores/session';
 import { useTimeline, useToggleLike, useToggleBookmark, useDeleteTweet } from '../hooks/useTweets';
+import { useProfile, useUpdateProfile, uploadAvatar } from '../hooks/useProfile';
 
 function ProfileContent() {
   const session = useStore($session);
@@ -13,11 +16,14 @@ function ProfileContent() {
   const toggleLike = useToggleLike();
   const toggleBookmark = useToggleBookmark();
   const deleteTweet = useDeleteTweet();
+  const { profile, loading: profileLoading } = useProfile(session?.id);
+  const { updateProfile, saving } = useUpdateProfile();
+  const [showEdit, setShowEdit] = useState(false);
 
   const user = session
     ? {
-        nickname: session.user_metadata?.nickname || session.user_metadata?.name || session.user_metadata?.full_name || session.email || '用户',
-        avatarUrl: session.user_metadata?.avatar_url || null,
+        nickname: profile?.nickname || session.user_metadata?.nickname || session.user_metadata?.name || session.user_metadata?.full_name || session.email || '用户',
+        avatarUrl: profile?.avatarUrl || session.user_metadata?.avatar_url || null,
       }
     : null;
 
@@ -32,8 +38,24 @@ function ProfileContent() {
       },
     }));
 
-  const initials = session?.email?.slice(0, 2).toUpperCase() || 'U';
+  const initials = (profile?.nickname || session?.email || 'U').slice(0, 2).toUpperCase();
   const tweetCount = myTweets.length;
+
+  const handleSaveProfile = useCallback(async (data: { nickname: string; bio: string; avatarFile?: File }) => {
+    if (!session?.id) return;
+    try {
+      let avatarUrl: string | null | undefined = undefined;
+      if (data.avatarFile) {
+        avatarUrl = await uploadAvatar(session.id, data.avatarFile);
+      }
+      await updateProfile(session.id, {
+        nickname: data.nickname,
+        bio: data.bio,
+        avatarUrl,
+      });
+      setShowEdit(false);
+    } catch {}
+  }, [session?.id, updateProfile]);
 
   return (
     <FeedLayout
@@ -55,12 +77,31 @@ function ProfileContent() {
       <div className="border-b border-border-subtle px-4 py-6">
         {session ? (
           <div className="flex items-start gap-4">
-            <div className="h-16 w-16 shrink-0 rounded-full border-2 border-cyan-400/30 bg-white/[0.05] flex items-center justify-center text-lg font-black text-white/80">
-              {initials}
+            {/* Avatar */}
+            <div className="relative group shrink-0">
+              <div className="h-16 w-16 rounded-full border-2 border-cyan-400/30 bg-white/[0.05] flex items-center justify-center text-lg font-black text-white/80 overflow-hidden">
+                {user?.avatarUrl ? (
+                  <img src={user.avatarUrl} className="w-full h-full object-cover" />
+                ) : (
+                  initials
+                )}
+              </div>
             </div>
             <div className="min-w-0 flex-1 pt-2">
-              <h2 className="text-xl font-bold text-primary">{user?.nickname || '用户'}</h2>
+              <div className="flex items-center gap-2">
+                <h2 className="text-xl font-bold text-primary truncate">{user?.nickname || '用户'}</h2>
+                <button
+                  onClick={() => setShowEdit(true)}
+                  className="h-7 w-7 rounded-full flex items-center justify-center text-secondary hover:text-white hover:bg-white/10 transition-colors shrink-0"
+                  title="编辑资料"
+                >
+                  <Pencil size={14} />
+                </button>
+              </div>
               <p className="text-sm text-tertiary mt-0.5">{session.email}</p>
+              {profile?.bio && (
+                <p className="text-sm text-secondary mt-2">{profile.bio}</p>
+              )}
               <div className="flex items-center gap-4 mt-3 text-sm">
                 <span className="text-secondary">
                   <strong className="text-primary">{tweetCount}</strong> 条推文
@@ -88,6 +129,18 @@ function ProfileContent() {
         <div className="flex items-center justify-center py-20 text-sm text-tertiary">
           请先登录
         </div>
+      )}
+
+      {/* Edit Profile Modal */}
+      {showEdit && (
+        <EditProfileModal
+          nickname={profile?.nickname || ''}
+          bio={profile?.bio || ''}
+          avatarUrl={user?.avatarUrl || null}
+          saving={saving}
+          onSave={handleSaveProfile}
+          onClose={() => setShowEdit(false)}
+        />
       )}
     </FeedLayout>
   );
