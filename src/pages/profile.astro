@@ -1,0 +1,7 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { ProfilePage } from '../components/ProfilePage';
+---
+<BaseLayout title="个人主页 — aPulse" description="个人主页">
+  <ProfilePage client:load />
+</BaseLayout>

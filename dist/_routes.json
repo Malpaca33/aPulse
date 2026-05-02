@@ -7,6 +7,11 @@
     "/",
     "/_astro/*",
     "/favicon.svg",
-    "/photos"
+    "/archive",
+    "/blog/*",
+    "/bookmarks",
+    "/design-preview",
+    "/photos",
+    "/profile"
   ]
 }

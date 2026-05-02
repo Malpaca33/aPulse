@@ -1,0 +1,7 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { BookmarksPage } from '../components/BookmarksPage';
+---
+<BaseLayout title="书签 — aPulse" description="我的书签">
+  <BookmarksPage client:load />
+</BaseLayout>

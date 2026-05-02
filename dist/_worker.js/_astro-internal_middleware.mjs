@@ -1,35 +1,16 @@
 globalThis.process ??= {}; globalThis.process.env ??= {};
-import './chunks/astro-designed-error-pages_BHQ9KOKd.mjs';
-import { s as sequence } from './chunks/index_DO235pAR.mjs';
+import './chunks/astro-designed-error-pages_C5-iSHav.mjs';
+import './chunks/astro/server_BbF_25Bn.mjs';
+import { s as sequence } from './chunks/index_DyC9zPbI.mjs';
 
-const When = {
-                	Client: 'client',
-                	Server: 'server',
-                	Prerender: 'prerender',
-                	StaticBuild: 'staticBuild',
-                	DevServer: 'devServer',
-              	};
-            	
-              const isBuildContext = Symbol.for('astro:when/buildContext');
-              const whenAmI = globalThis[isBuildContext] ? When.Prerender : When.Server;
-
-const middlewares = {
-  [When.Client]: () => {
-    throw new Error("Client should not run a middleware!");
-  },
-  [When.DevServer]: (_, next) => next(),
-  [When.Server]: (_, next) => next(),
-  [When.Prerender]: (ctx, next) => {
-    if (ctx.locals.runtime === void 0) {
-      ctx.locals.runtime = {
-        env: process.env
-      };
-    }
-    return next();
-  },
-  [When.StaticBuild]: (_, next) => next()
+const onRequest$1 = (context, next) => {
+  if (context.isPrerendered) {
+    context.locals.runtime ??= {
+      env: process.env
+    };
+  }
+  return next();
 };
-const onRequest$1 = middlewares[whenAmI];
 
 const onRequest = sequence(
 	onRequest$1,

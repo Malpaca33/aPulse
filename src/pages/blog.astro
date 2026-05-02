@@ -1,0 +1,45 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const posts = (await getCollection('blog'))
+  .filter((p) => p.data.published)
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+---
+
+<BaseLayout title="文章 — aPulse" description="精选文章">
+  <div class="mx-auto max-w-2xl px-4 py-12">
+    <h1 class="text-2xl font-bold mb-8">文章</h1>
+
+    {posts.length === 0 && (
+      <p class="text-secondary text-sm">暂无文章。</p>
+    )}
+
+    <div class="space-y-6">
+      {posts.map((post) => (
+        <article class="group">
+          <a href={`/blog/${post.slug}`} class="block">
+            <time class="text-xs text-secondary">
+              {post.data.date.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })}
+            </time>
+            <h2 class="text-lg font-semibold mt-1 group-hover:text-cyan-400 transition-colors">
+              {post.data.title}
+            </h2>
+            <p class="text-sm text-secondary mt-1 leading-relaxed">
+              {post.data.description}
+            </p>
+            {post.data.tags.length > 0 && (
+              <div class="flex gap-2 mt-2">
+                {post.data.tags.map((tag) => (
+                  <span class="text-xs px-2 py-0.5 rounded-full bg-white/5 text-secondary">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+          </a>
+        </article>
+      ))}
+    </div>
+  </div>
+</BaseLayout>

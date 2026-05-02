@@ -1,4 +1,2 @@
 globalThis.process ??= {}; globalThis.process.env ??= {};
-const renderers = [];
-
-export { renderers };
+export { r as renderers } from './chunks/_@astro-renderers_C7YAWX8s.mjs';

@@ -1,0 +1,75 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { FeedLayout } from '../components/templates/FeedLayout';
+import { TweetComposer, TweetCard } from '../components/molecules';
+import { Timeline } from '../components/organisms/Timeline';
+---
+
+<BaseLayout title="aPulse 2.0 — Design Preview">
+  <FeedLayout
+    user={{ nickname: 'Malpaca', avatarUrl: null }}
+    currentPath="/"
+  >
+    <!-- Header -->
+    <div class="sticky top-0 z-10 backdrop-blur-lg bg-surface-primary/80 border-b border-border-subtle">
+      <div class="px-4 h-12 flex items-center">
+        <h1 class="text-lg font-bold text-primary">主页</h1>
+      </div>
+    </div>
+
+    <!-- Composer -->
+    <TweetComposer
+      userName="Malpaca"
+      onSubmit={async (content) => {
+        await new Promise((r) => setTimeout(r, 800));
+        console.log('tweet:', content);
+      }}
+    />
+
+    <!-- Feed -->
+    <div class="divide-y divide-border-subtle">
+      <TweetCard
+        id="1"
+        content="aPulse 2.0 重构进行中！\n\nPhase 1 已完成:\n• Astro 5 升级\n• 63 个 CSS Design Tokens\n• 17 个 React 组件\n• 三栏 FeedLayout 布局\n\n下一步：接入 Nanostores + TanStack Query 数据层 🚀"
+        city="上海"
+        topic="aPulse"
+        createdAt={new Date().toISOString()}
+        user={{ nickname: 'Malpaca', avatarUrl: null }}
+        likesCount={42}
+        commentsCount={7}
+      />
+      <TweetCard
+        id="2"
+        content="今天在豫园拍到的光影，分享给大家。\n#摄影 #上海"
+        imageUrl="https://picsum.photos/seed/shanghai/600/400"
+        city="上海"
+        topic="摄影"
+        createdAt={new Date(Date.now() - 3600000 * 2).toISOString()}
+        user={{ nickname: '旅行者', avatarUrl: null }}
+        likesCount={128}
+        commentsCount={23}
+        isLiked={true}
+        isBookmarked={true}
+      />
+      <TweetCard
+        id="3"
+        content="最近在研究 Linear 风格的暗色主题配色。Slate 系 + 青色点缀确实高级，但更要注重信息层级的信息对比度。\n\nDesign tokens 不应该只是好看，还要保证可访问性。"
+        createdAt={new Date(Date.now() - 3600000 * 5).toISOString()}
+        user={{ nickname: '设计师', avatarUrl: null }}
+        likesCount={89}
+        commentsCount={12}
+        isLiked={false}
+      />
+      <TweetCard
+        id="4"
+        content="Cloudflare Workers 部署 Astro 体验太丝滑了，冷启动基本无感知。配合 D1 数据库，边缘全栈方案越来越成熟。"
+        city="深圳"
+        topic="技术"
+        createdAt={new Date(Date.now() - 3600000 * 24).toISOString()}
+        user={{ nickname: '全栈工程师', avatarUrl: null }}
+        likesCount={56}
+        commentsCount={8}
+      />
+    </div>
+  </FeedLayout>
+</BaseLayout>
