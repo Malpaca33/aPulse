@@ -1,6 +1,5 @@
 node_modules/
-dist/_astro/
-dist/_worker.js/chunks/
+dist/
 dist/_worker.js/manifest_*.mjs
 .idea/
 .claude/
