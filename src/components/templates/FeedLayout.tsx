@@ -26,9 +26,16 @@ export function FeedLayout({
   hideRightSidebar,
 }: FeedLayoutProps) {
   return (
-    <div className="mx-auto flex h-dvh max-w-[1320px] overflow-hidden">
+    <div className="relative mx-auto flex h-dvh max-w-[1320px] overflow-hidden">
+      {/* Background glowing blobs */}
+      <div className="blob-container" aria-hidden="true">
+        <div className="blob blob-cyan" />
+        <div className="blob blob-indigo" />
+        <div className="blob blob-rose" />
+      </div>
+
       {/* Left Sidebar — fixed */}
-      <div className="hidden md:block w-[68px] xl:w-[220px] shrink-0 h-full overflow-y-auto">
+      <div className="relative z-10 hidden md:block w-[68px] xl:w-[220px] shrink-0 h-full overflow-y-auto glass-sidebar">
         <div className="xl:px-3">
           <LeftSidebar
             user={user}
@@ -41,14 +48,14 @@ export function FeedLayout({
         </div>
       </div>
 
-      {/* Main Content — scrollable */}
-      <main className="flex-1 min-w-0 border-x border-border-subtle overflow-y-auto">
+      {/* Main Content — scrollable glass container */}
+      <main className="relative z-10 flex-1 min-w-0 border border-glass-border/60 overflow-y-auto glass-card rounded-2xl">
         {children}
       </main>
 
       {/* Right Sidebar — fixed */}
       {!hideRightSidebar && (
-        <div className="hidden lg:block w-[320px] shrink-0 h-full overflow-y-auto px-4">
+        <div className="relative z-10 hidden lg:block w-[320px] shrink-0 h-full overflow-y-auto px-4">
           <RightSidebar />
         </div>
       )}

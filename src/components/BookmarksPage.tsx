@@ -113,7 +113,7 @@ export function BookmarksPage() {
 
   return (
     <div>
-      <div className="sticky top-0 z-10 backdrop-blur-lg bg-surface-primary/80 border-b border-border-subtle">
+      <div className="sticky top-0 z-10 glass-header border-b border-glass-border">
         <div className="px-4 h-12 flex items-center">
           <h1 className="text-lg font-bold text-primary">书签</h1>
         </div>

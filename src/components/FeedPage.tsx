@@ -7,7 +7,9 @@ import { Timeline } from './organisms/Timeline';
 import { ShareModal } from './organisms/ShareModal';
 import { $session, $sessionLoading, initSession, signInAnonymously, signInWithOAuth, signOut } from '../stores/session';
 import { $dateFilter, clearDateFilter } from '../stores/dateFilter';
-import { useTimeline, usePostTweet, useToggleLike, useToggleBookmark, useDeleteTweet } from '../hooks/useTweets';
+import { useTimeline } from '../hooks/useTimeline';
+import { usePostTweet } from '../hooks/usePostTweet';
+import { useToggleLike, useToggleBookmark, useDeleteTweet } from '../hooks/useMutations';
 import { useRealtimeFeed } from '../hooks/useRealtime';
 
 function FeedContent() {
@@ -80,7 +82,7 @@ function FeedContent() {
       sessionLoading={sessionLoading}
     >
       {/* Header */}
-      <div className="sticky top-0 z-10 backdrop-blur-lg bg-surface-primary/80 border-b border-border-subtle">
+      <div className="sticky top-0 z-10 glass-header">
         <div className="px-4 h-12 flex items-center justify-between">
           <h1 className="text-lg font-bold text-primary">主页</h1>
         </div>

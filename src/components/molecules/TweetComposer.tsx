@@ -60,7 +60,7 @@ export function TweetComposer({
   const strokeDashoffset = circumference * (1 - charsLeft / MAX_CHARS);
 
   return (
-    <div className="flex gap-3 px-4 py-3 border-b border-border-subtle">
+    <div className="flex gap-3 px-4 py-4 border-b border-glass-border glass-card rounded-none">
       <Avatar src={userAvatar} alt={userName || '我'} size="lg" />
       <div className="flex-1 min-w-0">
         <textarea

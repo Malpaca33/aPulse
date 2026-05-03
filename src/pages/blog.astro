@@ -1,15 +1,18 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { BlogPostList } from '../components/molecules/BlogPostList';
 
 const posts = (await getCollection('blog'))
   .filter((p) => p.data.published)
   .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 ---
-
 <BaseLayout title="文章 — aPulse" description="精选文章">
   <div class="mx-auto max-w-2xl px-4 py-12">
-    <h1 class="text-2xl font-bold mb-8">文章</h1>
+    <div class="flex items-center justify-between mb-8">
+      <h1 class="text-2xl font-bold">文章</h1>
+      <a href="/blog/manage" class="text-sm text-cyan-400 hover:text-cyan-300 transition-colors">管理</a>
+    </div>
 
     {posts.length === 0 && (
       <p class="text-secondary text-sm">暂无文章。</p>
@@ -41,5 +44,8 @@ const posts = (await getCollection('blog'))
         </article>
       ))}
     </div>
+
+    <!-- Database blog posts (client-loaded) -->
+    <BlogPostList client:load />
   </div>
 </BaseLayout>

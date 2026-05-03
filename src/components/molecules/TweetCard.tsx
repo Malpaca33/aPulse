@@ -1,8 +1,8 @@
 import { useState, useCallback } from 'react';
+import { useStore } from '@nanostores/react';
 import { Avatar } from '../atoms/Avatar';
 import { ActionBar } from './ActionBar';
-import { useComments, usePostComment } from '../../hooks/useComments';
-import { useStore } from '@nanostores/react';
+import { InlineComments } from './InlineComments';
 import { $session } from '../../stores/session';
 
 interface TweetCardProps {
@@ -43,38 +43,22 @@ export function TweetCard({
   isBookmarked,
   onLike,
   onBookmark,
-  onComment,
   onShare,
   onDelete,
 }: TweetCardProps) {
   const timeAgo = formatTimeAgo(createdAt);
   const session = useStore($session);
-  const { comments, loading: commentsLoading, refetch } = useComments(id);
-  const { postComment, posting } = usePostComment();
-  const [showCommentInput, setShowCommentInput] = useState(false);
-  const [commentInput, setCommentInput] = useState('');
-  const MAX_VISIBLE_COMMENTS = 4;
-  const hasMoreComments = comments.length > MAX_VISIBLE_COMMENTS;
+  const [showComments, setShowComments] = useState(false);
 
   const handleCommentClick = useCallback(() => {
-    setShowCommentInput((v) => !v);
-    onComment?.();
-  }, [onComment]);
-
-  const handleSubmitComment = useCallback(async () => {
-    if (!commentInput.trim() || posting) return;
-    try {
-      await postComment(id, commentInput.trim());
-      setCommentInput('');
-      refetch();
-    } catch {}
-  }, [commentInput, posting, id, postComment, refetch]);
+    setShowComments((v) => !v);
+  }, []);
 
   const isAuthor = session?.id === tweetUserId;
   const tweetUrl = `/tweet/${id}`;
 
   return (
-    <article className="group flex gap-3 px-4 py-3 transition-colors hover:bg-white/[0.01]">
+    <article className="group flex gap-3 px-4 py-3 transition-all duration-300 hover:glass-card rounded-none last-of-type:rounded-b-2xl">
       {/* Avatar */}
       <div className="shrink-0">
         <Avatar src={user.avatarUrl} alt={user.nickname || '用户'} size="lg" />
@@ -146,63 +130,9 @@ export function TweetCard({
           )}
         </div>
 
-        {/* Comment input — on demand */}
-        {showCommentInput && session && (
-          <div className="mt-2 pt-3 border-t border-border-subtle">
-            <div className="flex gap-2">
-              <input
-                value={commentInput}
-                onChange={(e) => setCommentInput(e.target.value)}
-                placeholder="写下你的评论..."
-                className="flex-1 bg-surface-secondary border border-border-default rounded-xl px-3 py-2 text-sm text-primary placeholder:text-tertiary outline-none focus:border-cyan-400/40 transition-colors"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    handleSubmitComment();
-                  }
-                }}
-              />
-              <button
-                onClick={handleSubmitComment}
-                disabled={!commentInput.trim() || posting}
-                className="px-4 py-2 rounded-xl bg-cyan-500 text-sm font-semibold text-slate-950 hover:bg-cyan-400 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                {posting ? '...' : '发送'}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Comments — only if there are comments to show */}
-        {!commentsLoading && comments.length > 0 && (
-          <div className="mt-2 pt-3 border-t border-border-subtle space-y-2">
-            {comments.slice(0, MAX_VISIBLE_COMMENTS).map((c: any) => (
-              <div key={c.id} className="flex gap-2">
-                <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-[9px] font-bold text-tertiary shrink-0 mt-0.5">
-                  {(c.profiles?.nickname || '?')[0].toUpperCase()}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-xs font-medium text-primary">
-                      {c.profiles?.nickname || '匿名'}
-                    </span>
-                    <span className="text-[10px] text-tertiary">
-                      {formatTimeAgo(c.created_at)}
-                    </span>
-                  </div>
-                  <p className="text-sm text-primary/80 whitespace-pre-wrap">{c.content}</p>
-                </div>
-              </div>
-            ))}
-            {hasMoreComments && (
-              <a
-                href={tweetUrl}
-                className="block text-xs text-cyan-400 hover:text-cyan-300 transition-colors pt-1"
-              >
-                查看全部 {comments.length} 条评论
-              </a>
-            )}
-          </div>
+        {/* Inline Comments */}
+        {showComments && (
+          <InlineComments tweetId={id} tweetUrl={tweetUrl} />
         )}
       </div>
     </article>

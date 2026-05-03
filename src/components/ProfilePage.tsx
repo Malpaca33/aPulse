@@ -6,7 +6,8 @@ import { FeedLayout } from './templates/FeedLayout';
 import { Timeline } from './organisms/Timeline';
 import { EditProfileModal } from './molecules/EditProfileModal';
 import { $session, $sessionLoading, initSession, signInAnonymously, signInWithOAuth, signOut } from '../stores/session';
-import { useTimeline, useToggleLike, useToggleBookmark, useDeleteTweet } from '../hooks/useTweets';
+import { useTimeline } from '../hooks/useTimeline';
+import { useToggleLike, useToggleBookmark, useDeleteTweet } from '../hooks/useMutations';
 import { useProfile, useUpdateProfile, uploadAvatar } from '../hooks/useProfile';
 
 function ProfileContent() {
@@ -16,7 +17,7 @@ function ProfileContent() {
   const toggleLike = useToggleLike();
   const toggleBookmark = useToggleBookmark();
   const deleteTweet = useDeleteTweet();
-  const { profile, loading: profileLoading } = useProfile(session?.id);
+  const { profile, loading: profileLoading, refetch: refetchProfile } = useProfile(session?.id);
   const { updateProfile, saving } = useUpdateProfile();
   const [showEdit, setShowEdit] = useState(false);
 
@@ -41,21 +42,26 @@ function ProfileContent() {
   const initials = (profile?.nickname || session?.email || 'U').slice(0, 2).toUpperCase();
   const tweetCount = myTweets.length;
 
+  const [editError, setEditError] = useState<string | null>(null);
+
   const handleSaveProfile = useCallback(async (data: { nickname: string; bio: string; avatarFile?: File }) => {
     if (!session?.id) return;
+    setEditError(null);
     try {
       let avatarUrl: string | null | undefined = undefined;
       if (data.avatarFile) {
         avatarUrl = await uploadAvatar(session.id, data.avatarFile);
       }
       await updateProfile(session.id, {
-        nickname: data.nickname,
-        bio: data.bio,
-        avatarUrl,
+        nickname: data.nickname || null,
+        bio: data.bio || null,
+        avatarUrl: avatarUrl ?? null,
       });
-      setShowEdit(false);
-    } catch {}
-  }, [session?.id, updateProfile]);
+      refetchProfile();
+    } catch (e: any) {
+      setEditError(e?.message || '保存失败，请重试');
+    }
+  }, [session?.id, updateProfile, refetchProfile]);
 
   return (
     <FeedLayout
@@ -67,7 +73,7 @@ function ProfileContent() {
       sessionLoading={sessionLoading}
     >
       {/* Header */}
-      <div className="sticky top-0 z-10 backdrop-blur-lg bg-surface-primary/80 border-b border-border-subtle">
+      <div className="sticky top-0 z-10 glass-header border-b border-glass-border">
         <div className="px-4 h-12 flex items-center">
           <h1 className="text-lg font-bold text-primary">个人主页</h1>
         </div>
@@ -138,8 +144,9 @@ function ProfileContent() {
           bio={profile?.bio || ''}
           avatarUrl={user?.avatarUrl || null}
           saving={saving}
+          error={editError}
           onSave={handleSaveProfile}
-          onClose={() => setShowEdit(false)}
+          onClose={() => { setShowEdit(false); setEditError(null); }}
         />
       )}
     </FeedLayout>

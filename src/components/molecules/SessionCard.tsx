@@ -26,7 +26,7 @@ interface SessionCardProps {
 export function SessionCard({ user, onLogin, onAnonymousLogin, onLogout, loading }: SessionCardProps) {
   if (loading) {
     return (
-      <div className="p-4 rounded-2xl border border-border-default bg-surface-secondary">
+      <div className="p-4 rounded-2xl glass-card">
         <div className="animate-pulse flex gap-3 items-center">
           <div className="h-8 w-8 rounded-full bg-white/10" />
           <div className="h-4 flex-1 rounded bg-white/10" />
@@ -34,16 +34,17 @@ export function SessionCard({ user, onLogin, onAnonymousLogin, onLogout, loading
       </div>
     );
   }
+
   if (!user) {
     return (
-      <div className="p-4 rounded-2xl border border-border-default bg-surface-secondary">
+      <div className="p-4 rounded-2xl glass-card">
         <p className="text-sm text-secondary mb-3">登录后即可发布和互动</p>
         <div className="flex flex-col gap-2">
           {LOGIN_OPTIONS.map((method) => (
             <button
               key={method.provider}
               onClick={() => onLogin?.(method.provider)}
-              className={`flex items-center gap-3 w-full px-3 py-2 rounded-xl border border-border-default text-sm text-secondary ${method.color} transition-all`}
+              className={`flex items-center gap-3 w-full px-3 py-2 rounded-xl border border-glass-border text-sm text-secondary ${method.color} transition-all`}
             >
               <span className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold">
                 {method.icon}
@@ -53,7 +54,7 @@ export function SessionCard({ user, onLogin, onAnonymousLogin, onLogout, loading
           ))}
           <button
             onClick={onAnonymousLogin}
-            className="flex items-center gap-3 w-full px-3 py-2 rounded-xl border border-border-default text-sm text-secondary hover:bg-white/5 hover:text-white transition-all"
+            className="flex items-center gap-3 w-full px-3 py-2 rounded-xl border border-glass-border text-sm text-secondary hover:bg-white/5 hover:text-white transition-all"
           >
             <span className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center text-xs">?</span>
             匿名体验
@@ -64,7 +65,7 @@ export function SessionCard({ user, onLogin, onAnonymousLogin, onLogout, loading
   }
 
   return (
-    <div className="flex items-center gap-3 p-3 rounded-2xl border border-border-default bg-surface-secondary">
+    <div className="flex items-center gap-3 p-3 rounded-2xl glass-card">
       <Avatar src={user.avatarUrl} alt={user.nickname || '用户'} size="md" />
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-primary truncate">
@@ -73,7 +74,7 @@ export function SessionCard({ user, onLogin, onAnonymousLogin, onLogout, loading
       </div>
       <button
         onClick={onLogout}
-        className="text-xs text-tertiary hover:text-semantic-danger transition-colors"
+        className="text-xs text-tertiary hover:text-rose-400 transition-colors"
       >
         退出
       </button>

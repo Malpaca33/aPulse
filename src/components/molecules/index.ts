@@ -10,3 +10,4 @@ export { ContactCard } from './ContactCard';
 export { PhotoGrid } from './PhotoGrid';
 export { MapView } from './MapView';
 export { PhotoEditModal } from './PhotoEditModal';
+export { InlineComments } from './InlineComments';

@@ -49,7 +49,7 @@ export function PhotoGrid({ photos, accentColor = 'cyan', showEditButton = true,
         >
           <a
             href={`/tweet/${p.id}`}
-            className={`group relative aspect-square overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] transition ${styles.border}`}
+            className={`group relative aspect-square overflow-hidden rounded-2xl border border-glass-border bg-white/[0.02] transition-all duration-300 ${styles.border}`}
           >
           <img
             src={p.image_url}

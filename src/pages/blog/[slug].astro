@@ -8,43 +8,85 @@ export async function getStaticPaths() {
     .filter((p) => p.data.published)
     .map((post) => ({
       params: { slug: post.slug },
-      props: { post },
     }));
 }
 
 const { slug } = Astro.params;
-const post = await getEntryBySlug('blog', slug!);
+const mdxPost = await getEntryBySlug('blog', slug!);
 
-if (!post) {
-  return Astro.redirect('/blog');
+let Content, title, description, date, tags;
+if (mdxPost) {
+  const rendered = await mdxPost.render();
+  Content = rendered.Content;
+  title = mdxPost.data.title;
+  description = mdxPost.data.description;
+  date = mdxPost.data.date;
+  tags = mdxPost.data.tags;
 }
-
-const { Content } = await post.render();
 ---
 
-<BaseLayout title={`${post.data.title} — aPulse`} description={post.data.description}>
-  <article class="mx-auto max-w-2xl px-4 py-12">
-    <header class="mb-8">
-      <a href="/blog" class="text-xs text-secondary hover:text-cyan-400 transition-colors">
-        &larr; 返回文章列表
-      </a>
-      <h1 class="text-2xl font-bold mt-4">{post.data.title}</h1>
-      <time class="text-xs text-secondary block mt-2">
-        {post.data.date.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })}
-      </time>
-      {post.data.tags.length > 0 && (
-        <div class="flex gap-2 mt-2">
-          {post.data.tags.map((tag) => (
-            <span class="text-xs px-2 py-0.5 rounded-full bg-white/5 text-secondary">
-              {tag}
-            </span>
-          ))}
-        </div>
-      )}
-    </header>
-
-    <div class="prose prose-invert prose-cyan max-w-none">
-      <Content />
+{mdxPost ? (
+  <BaseLayout title={`${title} — aPulse`} description={description}>
+    <article class="mx-auto max-w-2xl px-4 py-12">
+      <header class="mb-8">
+        <a href="/blog" class="text-xs text-secondary hover:text-cyan-400 transition-colors">&larr; 返回文章列表</a>
+        <h1 class="text-2xl font-bold mt-4">{title}</h1>
+        <time class="text-xs text-secondary block mt-2">
+          {date.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })}
+        </time>
+        {tags.length > 0 && (
+          <div class="flex gap-2 mt-2">
+            {tags.map((tag) => (
+              <span class="text-xs px-2 py-0.5 rounded-full bg-white/5 text-secondary">{tag}</span>
+            ))}
+          </div>
+        )}
+      </header>
+      <div class="prose prose-invert prose-cyan max-w-none">
+        <Content />
+      </div>
+    </article>
+  </BaseLayout>
+) : (
+  <BaseLayout title="文章 — aPulse">
+    <div class="mx-auto max-w-2xl px-4 py-12">
+      <a href="/blog" class="text-xs text-secondary hover:text-cyan-400 transition-colors">&larr; 返回文章列表</a>
+      <div id="db-post" class="mt-8" data-slug={slug}>
+        <p class="text-sm text-secondary text-center py-8">加载中...</p>
+      </div>
     </div>
-  </article>
-</BaseLayout>
+
+    <script>
+      (async function() {
+        const el = document.getElementById('db-post');
+        if (!el) return;
+        const slug = el.dataset.slug;
+        try {
+          const { createClient } = await import('@supabase/supabase-js');
+          const supabase = createClient(
+            'https://dnejhngxseaxsgidvcqc.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRuZWpobmd4c2VheHNnaWR2Y3FjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwMzcwNTQsImV4cCI6MjA5MjYxMzA1NH0.ydSdRZVOGUiOp2NN70zY_xRpoO4AK1c3sYM7mH5fn1k'
+          );
+          const { data } = await supabase
+            .from('blog_posts')
+            .select('*')
+            .eq('slug', slug)
+            .eq('published', true)
+            .single();
+          if (data) {
+            el.innerHTML =
+              '<h1 class="text-2xl font-bold">' + esc(data.title) + '</h1>' +
+              '<div class="text-xs text-secondary mt-2 mb-6">' + new Date(data.created_at).toLocaleDateString('zh-CN', {year:'numeric',month:'long',day:'numeric'}) + '</div>' +
+              (data.tags?.length ? '<div class="flex gap-2 mb-6">' + data.tags.map(t => '<span class="text-xs px-2 py-0.5 rounded-full bg-white/5 text-secondary">#'+esc(t)+'</span>').join('') + '</div>' : '') +
+              '<div class="text-sm leading-relaxed whitespace-pre-wrap">' + esc(data.content) + '</div>';
+          } else {
+            el.innerHTML = '<p class="text-sm text-secondary text-center py-8">文章不存在</p>';
+          }
+        } catch(e) {
+          el.innerHTML = '<p class="text-sm text-rose-400 text-center py-8">加载失败</p>';
+        }
+      })();
+      function esc(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+    </script>
+  </BaseLayout>
+)}

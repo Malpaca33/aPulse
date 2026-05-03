@@ -3,7 +3,8 @@ import { QueryProvider } from './QueryProvider';
 import { TweetDetail } from './molecules/TweetDetail';
 import { CommentSection } from './organisms/CommentSection';
 import { ShareModal } from './organisms/ShareModal';
-import { useTweet, useToggleTweetLike, useToggleTweetBookmark } from '../hooks/useTweet';
+import { useTweet } from '../hooks/useTweet';
+import { useToggleLike, useToggleBookmark } from '../hooks/useMutations';
 
 function TweetDetailContent() {
   const [tweetId, setTweetId] = useState<string | null>(null);
@@ -15,8 +16,8 @@ function TweetDetailContent() {
   }, []);
 
   const { data: tweet, isLoading, error } = useTweet(tweetId || '');
-  const toggleLike = useToggleTweetLike();
-  const toggleBookmark = useToggleTweetBookmark();
+  const toggleLike = useToggleLike([['tweet', tweetId]]);
+  const toggleBookmark = useToggleBookmark([['tweet', tweetId]]);
 
   if (!tweetId) {
     return (
@@ -56,8 +57,8 @@ function TweetDetailContent() {
       {/* Tweet detail */}
       <TweetDetail
         tweet={tweet}
-        onLike={() => toggleLike.mutate({ tweetId: tweet.id, currentlyLiked: tweet.viewer_has_liked })}
-        onBookmark={() => toggleBookmark.mutate({ tweetId: tweet.id, currentlyBookmarked: tweet.viewer_has_bookmarked })}
+        onLike={() => toggleLike.mutate(tweet.id)}
+        onBookmark={() => toggleBookmark.mutate(tweet.id)}
         onShare={() => setShareTweet(tweet)}
       />
 

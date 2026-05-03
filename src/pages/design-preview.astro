@@ -11,7 +11,7 @@ import { Timeline } from '../components/organisms/Timeline';
     currentPath="/"
   >
     <!-- Header -->
-    <div class="sticky top-0 z-10 backdrop-blur-lg bg-surface-primary/80 border-b border-border-subtle">
+    <div class="sticky top-0 z-10 glass-header border-b border-glass-border">
       <div class="px-4 h-12 flex items-center">
         <h1 class="text-lg font-bold text-primary">主页</h1>
       </div>
@@ -27,7 +27,7 @@ import { Timeline } from '../components/organisms/Timeline';
     />
 
     <!-- Feed -->
-    <div class="divide-y divide-border-subtle">
+    <div class="divide-y divide-border-subtle animate-entrance">
       <TweetCard
         id="1"
         content="aPulse 2.0 重构进行中！\n\nPhase 1 已完成:\n• Astro 5 升级\n• 63 个 CSS Design Tokens\n• 17 个 React 组件\n• 三栏 FeedLayout 布局\n\n下一步：接入 Nanostores + TanStack Query 数据层 🚀"

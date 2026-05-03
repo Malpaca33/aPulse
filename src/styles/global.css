@@ -19,38 +19,186 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
+  /* Subtle radial vignette over the background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(6, 182, 212, 0.03) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 100%, rgba(99, 102, 241, 0.02) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
   ::selection {
     background: rgba(6, 182, 212, 0.24);
   }
 
-  /* Scrollbar */
   ::-webkit-scrollbar {
     width: 4px;
   }
-
   ::-webkit-scrollbar-track {
     background: transparent;
   }
-
   ::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.08);
     border-radius: 9999px;
   }
-
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.18);
   }
 }
 
+/* --- Glass Panel --- */
+@layer components {
+  .glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    transition: background 0.3s var(--ease-out), border-color 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out);
+  }
+
+  .glass-panel:hover {
+    background: var(--glass-bg-hover);
+    border-color: var(--glass-border-hover);
+  }
+
+  .glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur-sm));
+    -webkit-backdrop-filter: blur(var(--glass-blur-sm));
+    border: 1px solid var(--glass-border);
+    transition: background 0.25s var(--ease-out), border-color 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out);
+  }
+
+  .glass-card:hover {
+    background: var(--glass-bg-hover);
+    border-color: var(--glass-border-hover);
+  }
+
+  .glass-sidebar {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border-right: 1px solid var(--glass-border);
+    transition: background 0.4s var(--ease-out);
+    /* Gradient fade on the right edge so it doesn't look like a hard cut */
+    mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
+  }
+
+  .glass-header {
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border-bottom: 1px solid var(--glass-border);
+  }
+
+  .glass-sidebar-item {
+    transition: background 0.2s var(--ease-out), transform 0.2s var(--ease-out);
+  }
+
+  .glass-sidebar-item:hover {
+    background: rgba(255, 255, 255, 0.04);
+    transform: translateX(2px);
+  }
+}
+
+/* --- Background Blobs --- */
+@layer base {
+  .blob-container {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(100px);
+    will-change: transform;
+    opacity: 0.8;
+  }
+
+  .blob-cyan {
+    width: 600px;
+    height: 600px;
+    background: var(--blob-cyan);
+    animation: blob-drift 20s ease-in-out infinite;
+    top: -15%;
+    left: -8%;
+  }
+
+  .blob-indigo {
+    width: 500px;
+    height: 500px;
+    background: var(--blob-indigo);
+    animation: blob-drift 25s ease-in-out infinite reverse;
+    bottom: -12%;
+    right: -5%;
+  }
+
+  .blob-rose {
+    width: 400px;
+    height: 400px;
+    background: var(--blob-rose);
+    animation: blob-drift 22s ease-in-out infinite;
+    top: 45%;
+    left: 55%;
+  }
+
+  @keyframes blob-drift {
+    0%, 100% {
+      transform: translate(0, 0) scale(1) rotate(0deg);
+    }
+    25% {
+      transform: translate(80px, -50px) scale(1.08) rotate(3deg);
+    }
+    50% {
+      transform: translate(-40px, 70px) scale(0.92) rotate(-2deg);
+    }
+    75% {
+      transform: translate(50px, 40px) scale(1.04) rotate(1deg);
+    }
+  }
+}
+
+/* --- Entrance Animations --- */
 @layer utilities {
-  .like-burst {
-    animation: like-burst 0.34s var(--ease-spring);
+  .animate-entrance {
+    animation: entrance 0.5s var(--ease-out) both;
   }
 
-  .text-balance {
-    text-wrap: balance;
+  .animate-entrance-up {
+    animation: entrance-up 0.5s var(--ease-out) both;
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.4s var(--ease-out) both;
   }
 }
+
+@keyframes entrance {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes entrance-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* --- Interaction Animations --- */
+.like-burst { animation: like-burst 0.34s var(--ease-spring); }
+.text-balance { text-wrap: balance; }
 
 @keyframes like-burst {
   0% { transform: scale(1); }

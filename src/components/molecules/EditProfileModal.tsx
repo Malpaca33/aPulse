@@ -6,6 +6,7 @@ interface EditProfileModalProps {
   bio: string;
   avatarUrl: string | null;
   saving: boolean;
+  error?: string | null;
   onSave: (data: { nickname: string; bio: string; avatarFile?: File }) => void;
   onClose: () => void;
 }
@@ -15,6 +16,7 @@ export function EditProfileModal({
   bio,
   avatarUrl,
   saving,
+  error,
   onSave,
   onClose,
 }: EditProfileModalProps) {
@@ -27,6 +29,11 @@ export function EditProfileModal({
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('图片大小不能超过 5MB');
+      return;
+    }
     setAvatarFile(file);
     setPreviewUrl(URL.createObjectURL(file));
   };
@@ -41,9 +48,9 @@ export function EditProfileModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="w-full max-w-md mx-4 rounded-2xl border border-border-default bg-surface-primary shadow-2xl">
+      <div className="w-full max-w-md mx-4 rounded-2xl border border-glass-border glass-panel shadow-2xl animate-entrance">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-border-subtle">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-glass-border">
           <h2 className="text-lg font-bold text-primary">编辑个人资料</h2>
           <button
             onClick={onClose}
@@ -55,6 +62,13 @@ export function EditProfileModal({
 
         {/* Body */}
         <div className="px-5 py-5 space-y-5">
+          {/* Error */}
+          {error && (
+            <div className="rounded-xl bg-rose-500/10 border border-rose-500/20 px-4 py-3">
+              <p className="text-sm text-rose-400">{error}</p>
+            </div>
+          )}
+
           {/* Avatar */}
           <div className="flex items-center gap-4">
             <div className="relative group">
@@ -85,7 +99,7 @@ export function EditProfileModal({
             </div>
             <div>
               <p className="text-sm font-medium text-primary">头像</p>
-              <p className="text-xs text-tertiary">点击上传新头像</p>
+              <p className="text-xs text-tertiary">点击上传新头像，建议 512x512，最大 5MB</p>
             </div>
           </div>
 
@@ -96,7 +110,7 @@ export function EditProfileModal({
               value={editNickname}
               onChange={(e) => setEditNickname(e.target.value)}
               maxLength={30}
-              className="w-full bg-surface-secondary border border-border-default rounded-xl px-3.5 py-2.5 text-sm text-primary placeholder:text-tertiary outline-none focus:border-cyan-400/40 transition-colors"
+              className="w-full bg-glass-bg border border-glass-border rounded-xl px-3.5 py-2.5 text-sm text-primary placeholder:text-tertiary outline-none focus:border-cyan-400/40 transition-colors"
               placeholder="输入昵称"
             />
           </div>
@@ -109,7 +123,7 @@ export function EditProfileModal({
               onChange={(e) => setEditBio(e.target.value)}
               maxLength={160}
               rows={3}
-              className="w-full bg-surface-secondary border border-border-default rounded-xl px-3.5 py-2.5 text-sm text-primary placeholder:text-tertiary outline-none focus:border-cyan-400/40 transition-colors resize-none"
+              className="w-full bg-glass-bg border border-glass-border rounded-xl px-3.5 py-2.5 text-sm text-primary placeholder:text-tertiary outline-none focus:border-cyan-400/40 transition-colors resize-none"
               placeholder="介绍一下自己..."
             />
             <p className="text-[11px] text-tertiary text-right mt-1">{editBio.length}/160</p>
@@ -117,7 +131,7 @@ export function EditProfileModal({
         </div>
 
         {/* Footer */}
-        <div className="flex justify-end gap-2 px-5 py-4 border-t border-border-subtle">
+        <div className="flex justify-end gap-2 px-5 py-4 border-t border-glass-border">
           <button
             onClick={onClose}
             className="px-5 py-2 rounded-xl text-sm font-medium text-secondary hover:text-white hover:bg-white/10 transition-colors"

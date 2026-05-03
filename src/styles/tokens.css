@@ -1,5 +1,5 @@
 :root {
-  /* ─── Brand Cyan Palette ─── */
+  /* --- Brand Cyan Palette --- */
   --cyan-50: #ecfeff;
   --cyan-100: #cffafe;
   --cyan-200: #a5f3fc;
@@ -12,31 +12,31 @@
   --cyan-900: #164e63;
   --cyan-950: #083344;
 
-  /* ─── Surface ─── */
+  /* --- Surface --- */
   --bg-primary: #000000;
   --bg-secondary: #0a0a0a;
   --bg-tertiary: #141414;
   --bg-elevated: #1a1a1a;
 
-  /* ─── Border ─── */
+  /* --- Border --- */
   --border-subtle: rgba(255, 255, 255, 0.06);
   --border-default: rgba(255, 255, 255, 0.10);
   --border-strong: rgba(255, 255, 255, 0.15);
   --border-accent: rgba(6, 182, 212, 0.40);
 
-  /* ─── Text ─── */
+  /* --- Text --- */
   --text-primary: rgba(255, 255, 255, 0.92);
   --text-secondary: rgba(255, 255, 255, 0.65);
   --text-tertiary: rgba(255, 255, 255, 0.40);
 
-  /* ─── Semantic ─── */
+  /* --- Semantic --- */
   --color-like: #fb7185;
   --color-bookmark: #f59e0b;
   --color-star: #38bdf8;
   --color-danger: #f87171;
   --color-success: #34d399;
 
-  /* ─── Typography ─── */
+  /* --- Typography --- */
   --text-xs: 0.75rem;
   --text-sm: 0.875rem;
   --text-base: 1rem;
@@ -45,7 +45,6 @@
   --text-2xl: 1.5rem;
   --text-3xl: 1.875rem;
   --text-4xl: 2.25rem;
-
   --leading-xs: 1rem;
   --leading-sm: 1.25rem;
   --leading-base: 1.5rem;
@@ -54,10 +53,9 @@
   --leading-2xl: 2rem;
   --leading-3xl: 2.25rem;
   --leading-4xl: 2.5rem;
-
   --font-sans: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
 
-  /* ─── Spacing (4px grid) ─── */
+  /* --- Spacing (4px grid) --- */
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
@@ -69,15 +67,29 @@
   --space-12: 3rem;
   --space-16: 4rem;
 
-  /* ─── Border Radius ─── */
-  --radius-sm: 0.5rem;
-  --radius-md: 0.75rem;
-  --radius-lg: 1rem;
-  --radius-xl: 1.25rem;
-  --radius-2xl: 1.5rem;
+  /* --- Border Radius --- */
+  --radius-sm: 0.625rem;
+  --radius-md: 0.875rem;
+  --radius-lg: 1.25rem;
+  --radius-xl: 1.5rem;
+  --radius-2xl: 2rem;
+  --radius-3xl: 2.5rem;
   --radius-full: 9999px;
 
-  /* ─── Shadows ─── */
+  /* --- Glass / Frost --- */
+  --glass-bg: rgba(12, 12, 14, 0.45);
+  --glass-bg-hover: rgba(18, 18, 22, 0.6);
+  --glass-border: rgba(255, 255, 255, 0.06);
+  --glass-border-hover: rgba(255, 255, 255, 0.10);
+  --glass-blur: 12px;
+  --glass-blur-sm: 6px;
+
+  /* --- Blob Glow --- */
+  --blob-cyan: rgba(6, 182, 212, 0.15);
+  --blob-indigo: rgba(99, 102, 241, 0.10);
+  --blob-rose: rgba(244, 63, 94, 0.07);
+
+  /* --- Shadows --- */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
   --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5);
@@ -85,7 +97,7 @@
   --shadow-brand-glow: 0 0 20px rgba(6, 182, 212, 0.15);
   --shadow-like-glow: 0 0 16px rgba(251, 113, 133, 0.2);
 
-  /* ─── Animation ─── */
+  /* --- Animation --- */
   --duration-fast: 150ms;
   --duration-normal: 250ms;
   --duration-slow: 400ms;

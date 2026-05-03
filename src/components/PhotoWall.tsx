@@ -67,15 +67,19 @@ function PhotoWallContent() {
         return groups[b].length - groups[a].length;
       });
 
-      return sorted.map(([topic, topicPhotos]) => (
-        <section key={topic} className="mb-10">
-          <div className="mb-4 flex items-center gap-3">
-            <span className="rounded-full bg-cyan-400/10 px-3 py-1 text-sm font-semibold text-cyan-300">{topic}</span>
-            <span className="text-xs text-white/35">{topicPhotos.length} 张</span>
-          </div>
-          <PhotoGrid photos={topicPhotos} accentColor="cyan" onEdit={handleEdit} />
-        </section>
-      ));
+      return (
+        <div className="glass-card rounded-2xl p-6 animate-entrance-up">
+          {sorted.map(([topic, topicPhotos]) => (
+            <section key={topic} className="mb-10 last:mb-0">
+              <div className="mb-4 flex items-center gap-3">
+                <span className="rounded-full bg-cyan-400/10 px-3 py-1 text-sm font-semibold text-cyan-300">{topic}</span>
+                <span className="text-xs text-white/35">{topicPhotos.length} 张</span>
+              </div>
+              <PhotoGrid photos={topicPhotos} accentColor="cyan" onEdit={handleEdit} />
+            </section>
+          ))}
+        </div>
+      );
     }
 
     // city view
@@ -89,9 +93,9 @@ function PhotoWallContent() {
     const cityNames = Object.keys(cityMap).sort((a, b) => cityMap[b].length - cityMap[a].length);
 
     return (
-      <>
+      <div className="glass-card rounded-2xl p-6 animate-entrance-up">
         {cityNames.map(city => (
-          <section key={city} className="mb-10">
+          <section key={city} className="mb-10 last:mb-0">
             <div className="mb-4 flex items-center gap-3">
               <span className="rounded-full bg-amber-400/10 px-3 py-1 text-sm font-semibold text-amber-300">📍 {city}</span>
               <span className="text-xs text-white/35">{cityMap[city].length} 张</span>
@@ -100,7 +104,7 @@ function PhotoWallContent() {
           </section>
         ))}
         {noCity.length > 0 && (
-          <section className="mb-10">
+          <section className="mb-10 last:mb-0">
             <div className="mb-4 flex items-center gap-3">
               <span className="rounded-full bg-white/10 px-3 py-1 text-sm font-semibold text-white/50">未标注城市</span>
               <span className="text-xs text-white/35">{noCity.length} 张</span>
@@ -108,15 +112,21 @@ function PhotoWallContent() {
             <PhotoGrid photos={noCity} accentColor="white" onEdit={handleEdit} />
           </section>
         )}
-      </>
+      </div>
     );
   };
 
   return (
-    <section className="min-h-screen bg-black text-white">
-      <div className="mx-auto w-full max-w-[90rem] px-4 py-8 sm:px-6">
+    <section className="min-h-screen text-white relative">
+      {/* Background blobs */}
+      <div className="blob-container" aria-hidden="true">
+        <div className="blob blob-cyan opacity-60" />
+        <div className="blob blob-indigo opacity-40" />
+      </div>
+
+      <div className="relative z-10 mx-auto w-full max-w-[90rem] px-4 py-8 sm:px-6">
         {/* Header */}
-        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mb-8 glass-card rounded-2xl p-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <a href="/" className="inline-flex items-center gap-2 text-sm text-cyan-400 transition hover:text-cyan-300">&larr; 返回主页</a>
             <h1 className="mt-2 text-3xl font-black tracking-tight text-white">照片墙</h1>

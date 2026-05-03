@@ -9,29 +9,44 @@ export function useProfile(userId: string | undefined) {
   } | null>(null);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
+  const fetchProfile = useCallback(async () => {
     if (!userId) return;
     setLoading(true);
-    const supabase = createBrowserSupabase();
-    supabase
-      .from('profiles')
-      .select('nickname, bio, avatar_url')
-      .eq('id', userId)
-      .single()
-      .then(({ data }) => {
-        if (data) {
-          setProfile({
-            nickname: data.nickname || '',
-            bio: data.bio || '',
-            avatarUrl: data.avatar_url || null,
-          });
+    try {
+      const supabase = createBrowserSupabase();
+      const { data } = await supabase
+        .from('profiles')
+        .select('nickname, bio, avatar_url')
+        .eq('id', userId)
+        .maybeSingle();
+
+      if (data) {
+        setProfile({
+          nickname: data.nickname || '',
+          bio: data.bio || '',
+          avatarUrl: data.avatar_url || null,
+        });
+      } else {
+        // Profile doesn't exist yet — try to create it
+        const { error: insertError } = await supabase
+          .from('profiles')
+          .insert({ id: userId, nickname: '', bio: '' });
+
+        if (!insertError) {
+          setProfile({ nickname: '', bio: '', avatarUrl: null });
         }
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
+        // If insert fails, RLS might block it — just leave profile as null
+      }
+    } finally {
+      setLoading(false);
+    }
   }, [userId]);
 
-  return { profile, loading };
+  useEffect(() => {
+    fetchProfile();
+  }, [fetchProfile]);
+
+  return { profile, loading, refetch: fetchProfile };
 }
 
 export function useUpdateProfile() {
@@ -39,14 +54,14 @@ export function useUpdateProfile() {
 
   const updateProfile = useCallback(async (
     userId: string,
-    data: { nickname?: string; bio?: string; avatarUrl?: string | null },
+    data: { nickname?: string | null; bio?: string | null; avatarUrl?: string | null },
   ) => {
     setSaving(true);
     const supabase = createBrowserSupabase();
 
     const updates: Record<string, any> = {};
-    if (data.nickname !== undefined) updates.nickname = data.nickname;
-    if (data.bio !== undefined) updates.bio = data.bio;
+    if (data.nickname !== undefined) updates.nickname = data.nickname ?? '';
+    if (data.bio !== undefined) updates.bio = data.bio ?? '';
     if (data.avatarUrl !== undefined) updates.avatar_url = data.avatarUrl;
 
     if (Object.keys(updates).length === 0) {
@@ -68,8 +83,17 @@ export function useUpdateProfile() {
 
 export async function uploadAvatar(userId: string, file: File): Promise<string> {
   const supabase = createBrowserSupabase();
+
+  // Validate file
+  if (file.size > 5 * 1024 * 1024) {
+    throw new Error('图片大小不能超过 5MB');
+  }
+  if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+    throw new Error('仅支持 JPG、PNG、WebP 格式');
+  }
+
   const ext = file.name.split('.').pop();
-  const path = `avatars/${userId}/${Date.now()}.${ext}`;
+  const path = `${userId}/avatars/${Date.now()}.${ext}`;
 
   const { error } = await supabase.storage
     .from('images')
