@@ -7,6 +7,7 @@ interface ActionBarProps {
   commentsCount?: number;
   isLiked?: boolean;
   isBookmarked?: boolean;
+  hideBookmark?: boolean;
   onLike?: () => void;
   onBookmark?: () => void;
   onComment?: () => void;
@@ -18,6 +19,7 @@ export function ActionBar({
   commentsCount,
   isLiked,
   isBookmarked,
+  hideBookmark,
   onLike,
   onBookmark,
   onComment,
@@ -76,25 +78,27 @@ export function ActionBar({
         )}
       </button>
 
-      {/* Bookmark */}
-      <button
-        onClick={() => handleClick('bookmark', onBookmark)}
-        className={cn(
-          'flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm transition-all duration-200',
-          isBookmarked
-            ? 'text-semantic-bookmark hover:bg-amber-500/15'
-            : 'text-tertiary hover:text-semantic-bookmark hover:bg-amber-500/10'
-        )}
-      >
-        <Bookmark
-          size={18}
+      {/* Bookmark — 仅对登录用户显示 */}
+      {!hideBookmark && (
+        <button
+          onClick={() => handleClick('bookmark', onBookmark)}
           className={cn(
-            'transition-all duration-200',
-            isBookmarked ? 'fill-semantic-bookmark scale-110' : '',
-            animating === 'bookmark' && 'animate-bookmark'
+            'flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm transition-all duration-200',
+            isBookmarked
+              ? 'text-semantic-bookmark hover:bg-amber-500/15'
+              : 'text-tertiary hover:text-semantic-bookmark hover:bg-amber-500/10'
           )}
-        />
-      </button>
+        >
+          <Bookmark
+            size={18}
+            className={cn(
+              'transition-all duration-200',
+              isBookmarked ? 'fill-semantic-bookmark scale-110' : '',
+              animating === 'bookmark' && 'animate-bookmark'
+            )}
+          />
+        </button>
+      )}
 
       {/* Share */}
       <button

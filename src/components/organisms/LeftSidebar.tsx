@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useStore } from '@nanostores/react';
 import { motion } from 'framer-motion';
-import { Sparkles, Image, Bookmark, FileText, User, Bell, PenLine } from 'lucide-react';
+import { Sparkles, Image, Bookmark, FileText, User, Bell } from 'lucide-react';
 import { SessionCard } from '../molecules/SessionCard';
 import { Divider } from '../atoms/Divider';
 import { $unreadCount, loadNotifications } from '../../stores/notifications';
@@ -17,9 +17,7 @@ interface NavItem {
 const baseNavItems: Omit<NavItem, 'badge'>[] = [
   { href: '/', icon: <Sparkles size={30} />, label: '主页' },
   { href: '/photos', icon: <Image size={30} />, label: '照片墙' },
-  { href: '/bookmarks', icon: <Bookmark size={30} />, label: '书签' },
   { href: '/blog', icon: <FileText size={30} />, label: '文章' },
-  { href: '/profile', icon: <User size={30} />, label: '个人主页' },
 ];
 
 interface LeftSidebarProps {
@@ -44,8 +42,13 @@ export function LeftSidebar({ user, onLogin, onAnonymousLogin, onLogout, session
 
   const navItems: NavItem[] = [
     ...baseNavItems,
-    ...(session
-      ? [{ href: '/blog/manage', icon: <PenLine size={28} />, label: '写文章' }]
+    // 书签仅对非匿名用户显示（Google/QQ 登录）
+    ...(session && !session.is_anonymous
+      ? [{ href: '/bookmarks', icon: <Bookmark size={30} />, label: '书签' }]
+      : []),
+    // 个人主页仅对非匿名用户显示
+    ...(session && !session.is_anonymous
+      ? [{ href: '/profile', icon: <User size={30} />, label: '个人主页' }]
       : []),
     ...(unreadCount > 0
       ? [{ href: '#', icon: (

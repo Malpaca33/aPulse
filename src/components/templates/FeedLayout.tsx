@@ -35,7 +35,7 @@ export function FeedLayout({
       </div>
 
       {/* Left Sidebar — fixed */}
-      <div className="relative z-10 hidden md:block w-[68px] xl:w-[220px] shrink-0 h-full overflow-y-auto glass-sidebar">
+      <div className="relative z-10 hidden md:block w-[68px] xl:w-[220px] shrink-0 h-full overflow-y-auto glass-sidebar liquid-glass liquid-glass-sidebar-left">
         <div className="xl:px-3">
           <LeftSidebar
             user={user}
@@ -48,14 +48,14 @@ export function FeedLayout({
         </div>
       </div>
 
-      {/* Main Content — scrollable glass container */}
-      <main className="relative z-10 flex-1 min-w-0 border border-glass-border/60 overflow-y-auto glass-card rounded-2xl">
+      {/* Main Content — scrollable container */}
+      <main className="relative z-10 flex-1 min-w-0 overflow-y-auto">
         {children}
       </main>
 
       {/* Right Sidebar — fixed */}
       {!hideRightSidebar && (
-        <div className="relative z-10 hidden lg:block w-[320px] shrink-0 h-full overflow-y-auto px-4">
+        <div className="relative z-10 hidden lg:block w-[320px] shrink-0 h-full overflow-y-auto px-4 liquid-glass liquid-glass-sidebar-right rounded-2xl" style={{ background: 'var(--glass-bg)' }}>
           <RightSidebar />
         </div>
       )}

@@ -58,7 +58,7 @@ export function TweetCard({
   const tweetUrl = `/tweet/${id}`;
 
   return (
-    <article className="group flex gap-3 px-4 py-3 transition-all duration-300 hover:glass-card rounded-none last-of-type:rounded-b-2xl">
+    <article className="group flex gap-3 px-4 py-3 transition-all duration-200 rounded-none last-of-type:rounded-b-2xl border-b border-border-subtle last:border-b-0">
       {/* Avatar */}
       <div className="shrink-0">
         <Avatar src={user.avatarUrl} alt={user.nickname || '用户'} size="lg" />
@@ -114,6 +114,7 @@ export function TweetCard({
             commentsCount={commentsCount}
             isLiked={isLiked}
             isBookmarked={isBookmarked}
+            hideBookmark={!session || session.is_anonymous}
             onLike={onLike}
             onBookmark={onBookmark}
             onComment={handleCommentClick}

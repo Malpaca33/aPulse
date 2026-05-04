@@ -14,26 +14,42 @@ export function setSession(user: User | null) {
 
 export async function initSession() {
   try {
-    const supabase = createBrowserSupabase();
+    // URL hash 中有 access_token 时手动提取（处理 OAuth 回调）
+    const hashStr = window.location.hash || '';
+    if (hashStr && hashStr.includes('access_token')) {
+      try {
+        const params = new URLSearchParams(hashStr.replace(/^#/, ''));
+        const accessToken = params.get('access_token');
+        const refreshToken = params.get('refresh_token');
 
-    // 监听所有会话变化事件
-    supabase.auth.onAuthStateChange((event, session) => {
-      if (session) {
-        $session.set(session.user);
-      } else if (event === 'SIGNED_OUT') {
-        $session.set(null);
+        if (accessToken) {
+          const supabase = createBrowserSupabase();
+          const { data } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken || '',
+          });
+
+          if (data?.session) {
+            $session.set(data.session.user);
+            $sessionLoading.set(false);
+            window.history.replaceState(null, '', window.location.pathname);
+            return;
+          }
+        }
+      } catch {
+        // 静默降级，继续尝试从 storage 恢复
       }
-      $sessionLoading.set(false);
-    });
+    }
 
-    // 获取现有 session
+    // 通过 localStorage 恢复 session
+    const supabase = createBrowserSupabase();
     const { data: { session } } = await supabase.auth.getSession();
     if (session) {
       $session.set(session.user);
       $sessionLoading.set(false);
     }
 
-    // 安全超时：3 秒后无论有无 session 都停止 loading
+    // 安全超时
     setTimeout(() => {
       if ($sessionLoading.get()) {
         $sessionLoading.set(false);
@@ -60,7 +76,9 @@ export async function signInWithOAuth(provider: 'google' | 'qq') {
   const supabase = createBrowserSupabase();
   const { error } = await supabase.auth.signInWithOAuth({
     provider,
-    options: { redirectTo: window.location.origin },
+    options: {
+      redirectTo: window.location.origin + '/',
+    },
   });
   if (error) throw error;
 }

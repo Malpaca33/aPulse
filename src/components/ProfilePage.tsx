@@ -20,6 +20,17 @@ function ProfileContent() {
   const { profile, loading: profileLoading, refetch: refetchProfile } = useProfile(session?.id);
   const { updateProfile, saving } = useUpdateProfile();
   const [showEdit, setShowEdit] = useState(false);
+  const [redirecting, setRedirecting] = useState(false);
+
+  // 匿名用户重定向到首页
+  useEffect(() => {
+    if (!sessionLoading && (!session || session.is_anonymous)) {
+      setRedirecting(true);
+      window.location.href = '/';
+    }
+  }, [session, sessionLoading]);
+
+  if (redirecting) return null;
 
   const user = session
     ? {

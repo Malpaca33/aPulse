@@ -14,6 +14,7 @@ const posts = (await getCollection('blog'))
       <a href="/blog/manage" class="text-sm text-cyan-400 hover:text-cyan-300 transition-colors">管理</a>
     </div>
 
+    <!-- MDX posts (server-rendered) -->
     {posts.length === 0 && (
       <p class="text-secondary text-sm">暂无文章。</p>
     )}
@@ -34,9 +35,7 @@ const posts = (await getCollection('blog'))
             {post.data.tags.length > 0 && (
               <div class="flex gap-2 mt-2">
                 {post.data.tags.map((tag) => (
-                  <span class="text-xs px-2 py-0.5 rounded-full bg-white/5 text-secondary">
-                    {tag}
-                  </span>
+                  <span class="text-xs px-2 py-0.5 rounded-full bg-white/5 text-secondary">{tag}</span>
                 ))}
               </div>
             )}
@@ -45,7 +44,7 @@ const posts = (await getCollection('blog'))
       ))}
     </div>
 
-    <!-- Database blog posts (client-loaded) -->
+    <!-- DB blog posts (client-loaded) -->
     <BlogPostList client:load />
   </div>
 </BaseLayout>

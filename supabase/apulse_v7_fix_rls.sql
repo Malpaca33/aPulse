@@ -27,9 +27,15 @@ CREATE TABLE IF NOT EXISTS public.blog_posts (
 ALTER TABLE public.blog_posts ENABLE ROW LEVEL SECURITY;
 
 DO $$ BEGIN
+  -- Public 只能读已发布的文章
   IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'blog_posts publicly readable' AND tablename = 'blog_posts') THEN
     CREATE POLICY "blog_posts publicly readable" ON public.blog_posts
-      FOR SELECT TO public USING (true);
+      FOR SELECT TO public USING (published = true);
+  END IF;
+  -- 作者可以读自己的所有文章（包括草稿）
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'authors can read their own blog posts' AND tablename = 'blog_posts') THEN
+    CREATE POLICY "authors can read their own blog posts" ON public.blog_posts
+      FOR SELECT TO authenticated USING (auth.uid() = user_id);
   END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'users can insert their own blog posts' AND tablename = 'blog_posts') THEN
     CREATE POLICY "users can insert their own blog posts" ON public.blog_posts

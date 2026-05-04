@@ -57,7 +57,7 @@ export function SessionCard({ user, onLogin, onAnonymousLogin, onLogout, loading
             className="flex items-center gap-3 w-full px-3 py-2 rounded-xl border border-glass-border text-sm text-secondary hover:bg-white/5 hover:text-white transition-all"
           >
             <span className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center text-xs">?</span>
-            匿名体验
+            悄悄来
           </button>
         </div>
       </div>

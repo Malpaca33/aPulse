@@ -64,8 +64,8 @@ if (mdxPost) {
         try {
           const { createClient } = await import('@supabase/supabase-js');
           const supabase = createClient(
-            'https://dnejhngxseaxsgidvcqc.supabase.co',
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRuZWpobmd4c2VheHNnaWR2Y3FjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwMzcwNTQsImV4cCI6MjA5MjYxMzA1NH0.ydSdRZVOGUiOp2NN70zY_xRpoO4AK1c3sYM7mH5fn1k'
+            import.meta.env.PUBLIC_SUPABASE_URL,
+            import.meta.env.PUBLIC_SUPABASE_ANON_KEY
           );
           const { data } = await supabase
             .from('blog_posts')

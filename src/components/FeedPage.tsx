@@ -11,12 +11,14 @@ import { useTimeline } from '../hooks/useTimeline';
 import { usePostTweet } from '../hooks/usePostTweet';
 import { useToggleLike, useToggleBookmark, useDeleteTweet } from '../hooks/useMutations';
 import { useRealtimeFeed } from '../hooks/useRealtime';
+import { useProfile } from '../hooks/useProfile';
 
 function FeedContent() {
   const session = useStore($session);
   const sessionLoading = useStore($sessionLoading);
   const dateFilter = useStore($dateFilter);
   const { data, isLoading, fetchNextPage, hasNextPage } = useTimeline();
+  const { profile } = useProfile(session?.id);
 
   useRealtimeFeed();
   const postTweet = usePostTweet();
@@ -44,8 +46,8 @@ function FeedContent() {
 
   const user = session
     ? {
-        nickname: session.user_metadata?.nickname || session.user_metadata?.name || session.user_metadata?.full_name || session.email || '用户',
-        avatarUrl: session.user_metadata?.avatar_url || null,
+        nickname: profile?.nickname || session.user_metadata?.nickname || session.user_metadata?.name || session.user_metadata?.full_name || session.email || '用户',
+        avatarUrl: profile?.avatarUrl || session.user_metadata?.avatar_url || null,
       }
     : null;
 
@@ -84,7 +86,7 @@ function FeedContent() {
       {/* Header */}
       <div className="sticky top-0 z-10 glass-header">
         <div className="px-4 h-12 flex items-center justify-between">
-          <h1 className="text-lg font-bold text-primary">主页</h1>
+          <h1 className="text-lg font-bold text-primary">动态</h1>
         </div>
       </div>
 
@@ -123,6 +125,14 @@ function FeedContent() {
         onShare={handleShare}
         onDelete={(id) => deleteTweet.mutate(id)}
       />
+
+      {/* Empty state */}
+      {!isLoading && !sessionLoading && tweets.length === 0 && !dateFilter && (
+        <div className="flex flex-col items-center justify-center py-20 gap-3">
+          <p className="text-secondary text-sm">还没有内容</p>
+          <p className="text-tertiary text-xs">写下第一条动态吧</p>
+        </div>
+      )}
 
       {/* Load more */}
       {hasNextPage && !isLoading && (

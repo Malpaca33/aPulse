@@ -109,29 +109,31 @@ export function TweetDetail({ tweet, onLike, onBookmark, onShare }: TweetDetailP
           <span>{tweet.likes_count}</span>
         </button>
 
-        {/* Bookmark */}
-        <button
-          onClick={handleBookmark}
-          type="button"
-          className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm transition hover:bg-amber-500/10 ${
-            tweet.viewer_has_bookmarked ? 'text-amber-300' : 'text-white/55 hover:text-amber-300'
-          }`}
-          aria-label="书签"
-        >
-          <svg
-            viewBox="0 0 24 24"
-            className="h-5 w-5"
-            fill={tweet.viewer_has_bookmarked ? '#f59e0b' : 'none'}
-            stroke={tweet.viewer_has_bookmarked ? '#f59e0b' : 'currentColor'}
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            style={bookmarkAnim ? { animation: 'bookmark-pop 0.4s ease-out' } : undefined}
+        {/* Bookmark — 仅对登录用户显示 */}
+        {session && !session.is_anonymous && (
+          <button
+            onClick={handleBookmark}
+            type="button"
+            className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm transition hover:bg-amber-500/10 ${
+              tweet.viewer_has_bookmarked ? 'text-amber-300' : 'text-white/55 hover:text-amber-300'
+            }`}
+            aria-label="书签"
           >
-            <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" />
-          </svg>
-          <span>{tweet.viewer_has_bookmarked ? '已收藏' : '收藏'}</span>
-        </button>
+            <svg
+              viewBox="0 0 24 24"
+              className="h-5 w-5"
+              fill={tweet.viewer_has_bookmarked ? '#f59e0b' : 'none'}
+              stroke={tweet.viewer_has_bookmarked ? '#f59e0b' : 'currentColor'}
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              style={bookmarkAnim ? { animation: 'bookmark-pop 0.4s ease-out' } : undefined}
+            >
+              <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" />
+            </svg>
+            <span>{tweet.viewer_has_bookmarked ? '已收藏' : '收藏'}</span>
+          </button>
+        )}
 
         {/* Share */}
         <button
